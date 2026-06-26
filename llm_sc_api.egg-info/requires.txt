@@ -5,6 +5,7 @@ sqlmodel>=0.0.8
 supabase>=2.0
 email-validator>=1.4
 python-multipart>=0.0.6
+gunicorn>=23.0.0
 
 [tests]
 pytest>=8.0
