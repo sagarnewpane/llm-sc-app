@@ -1,0 +1,28 @@
+[project]
+name = "llm-sc-api"
+version = "0.1.0"
+description = "FastAPI service for LLM SC platform"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.110.1",
+    "uvicorn>=0.24.0",
+    "pydantic-settings>=2.3.0",
+    "sqlmodel>=0.0.8",
+    "supabase>=2.0",
+    "email-validator>=1.4",
+    "python-multipart>=0.0.6",
+]
+
+[project.optional-dependencies]
+tests = [
+    "pytest>=8.0",
+    "requests>=2.31",
+    "httpx>=0.28",
+]
+
+[build-system]
+requires = ["setuptools>=65.5.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.fastapi]
+entrypoint = "app.main:app"

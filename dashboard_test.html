@@ -1,0 +1,2175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heritage Pulse — Pashupatinath Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #EDE8E0;
+      --sidebar: #1C1612;
+      --sidebar-hover: #2A2118;
+      --sidebar-active: #352A20;
+      --surface: #FDFAF5;
+      --surface2: #F5F0E8;
+      --border: #D5CABC;
+      --border2: #BFB2A0;
+      --text: #1C1612;
+      --muted: #7A6E5E;
+      --accent: #B5451B;
+      --accent-hover: #9A3A16;
+      --accent-soft: rgba(181,69,27,0.07);
+      --gold: #B08A1E;
+      --gold-bg: #F5EDD8;
+      --gold-text: #7A6014;
+      --green: #4A7A44;
+      --green-bg: #EAF2E8;
+      --green-text: #366130;
+      --red: #B5451B;
+      --red-bg: #F9EDE7;
+      --red-text: #8C3210;
+      --amber: #B08A1E;
+      --amber-bg: #F5EDD8;
+      --amber-text: #7A6014;
+      --teal: #3D7A6A;
+      --teal-bg: #E5F0EC;
+      --teal-text: #2A5E50;
+      --sage: #6A8A5E;
+      --sage-bg: #ECF2EA;
+      --sage-text: #4A6A3E;
+      --sidebar-w: 232px;
+      --header-h: 60px;
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--sidebar);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      padding: 20px 20px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .torana-motif {
+      width: 100%;
+      height: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: rgba(176,138,30,0.12);
+      border: 1px solid rgba(176,138,30,0.2);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-icon svg { width: 20px; height: 20px; }
+
+    .logo-text { color: #fff; }
+    .logo-text .name {
+      font-family: var(--font-display);
+      font-size: 15px; font-weight: 600; line-height: 1.2;
+      letter-spacing: -0.2px;
+    }
+    .logo-text .sub {
+      font-size: 10.5px; color: rgba(255,255,255,0.35);
+      margin-top: 2px; letter-spacing: 0.3px;
+    }
+
+    .sidebar-nav { flex: 1; padding: 14px 0; }
+
+    .nav-section {
+      padding: 14px 20px 6px;
+      font-family: var(--font-mono);
+      font-size: 9px; font-weight: 700;
+      color: rgba(255,255,255,0.2);
+      text-transform: uppercase; letter-spacing: 1.5px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 20px; font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer; border-radius: 0;
+      transition: all 0.15s; text-decoration: none;
+      position: relative; user-select: none;
+      font-weight: 500;
+    }
+
+    .nav-item:hover { background: var(--sidebar-hover); color: rgba(255,255,255,0.8); }
+    .nav-item.active { background: var(--sidebar-active); color: #fff; }
+
+    .nav-item.active::before {
+      content: ''; position: absolute;
+      left: 0; top: 4px; bottom: 4px; width: 2px;
+      background: var(--gold); border-radius: 0 1px 1px 0;
+    }
+
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.6; }
+    .nav-item.active svg { opacity: 0.9; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: rgba(181,69,27,0.25); color: #E8A088;
+      font-family: var(--font-mono);
+      font-size: 9.5px; font-weight: 700;
+      padding: 2px 7px; border-radius: 3px;
+    }
+
+    .sidebar-footer {
+      padding: 14px 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .user-avatar {
+      width: 30px; height: 30px; border-radius: 5px;
+      background: rgba(176,138,30,0.2);
+      border: 1px solid rgba(176,138,30,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 12px; font-weight: 700; color: var(--gold);
+    }
+
+    .user-info .user-name {
+      font-size: 11.5px; font-weight: 600;
+      color: rgba(255,255,255,0.8);
+    }
+    .user-info .user-role {
+      font-size: 10px; color: rgba(255,255,255,0.3);
+      margin-top: 1px;
+    }
+
+    /* ===== MAIN ===== */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1; display: flex; flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ===== TOPBAR ===== */
+    .topbar {
+      height: var(--header-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 28px; position: sticky; top: 0; z-index: 50;
+      gap: 16px;
+    }
+
+    .topbar-title h1 {
+      font-family: var(--font-display);
+      font-size: 17px; font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+    .topbar-title p {
+      font-size: 11.5px; color: var(--muted);
+      margin-top: 1px;
+    }
+    .topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .topbar-flag { font-size: 18px; }
+
+    .topbar-btn {
+      width: 34px; height: 34px; border-radius: 5px;
+      background: var(--surface2); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 15px; position: relative; color: var(--muted);
+    }
+
+    .topbar-notif-dot {
+      position: absolute; top: 6px; right: 6px;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); border: 1.5px solid var(--surface);
+    }
+
+    .live-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--green-bg); color: var(--green-text);
+      padding: 4px 10px; border-radius: 4px;
+      font-size: 11px; font-weight: 600;
+      border: 1px solid rgba(74,122,68,0.12);
+    }
+
+    .live-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--green); animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* ===== PAGE ===== */
+    .page { padding: 24px 28px 40px; max-width: 1200px; }
+
+    /* ===== TAB VIEWS ===== */
+    .tab-view { display: none; }
+    .tab-view.active { display: block; }
+
+    /* ===== SECTION HEADER ===== */
+    .section-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px; margin-top: 8px;
+    }
+    .section-header h2 {
+      font-family: var(--font-display);
+      font-size: 15px; font-weight: 600;
+    }
+    .section-header .section-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* ===== KPI CARDS ===== */
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 14px; margin-bottom: 24px;
+    }
+    @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .kpi-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 5px; padding: 18px 18px 14px;
+      position: relative; overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .kpi-card:hover { border-color: var(--border2); }
+
+    .kpi-icon {
+      width: 32px; height: 32px; border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .kpi-icon svg { width: 16px; height: 16px; }
+    .kpi-icon.blue { background: var(--accent-soft); color: var(--accent); }
+    .kpi-icon.green { background: var(--green-bg); color: var(--green); }
+    .kpi-icon.amber { background: var(--gold-bg); color: var(--gold); }
+    .kpi-icon.purple { background: var(--teal-bg); color: var(--teal); }
+
+    .kpi-label {
+      font-size: 11px; color: var(--muted); font-weight: 500;
+      margin-bottom: 5px; letter-spacing: 0.2px;
+    }
+    .kpi-value {
+      font-family: var(--font-display);
+      font-size: 26px; font-weight: 700; line-height: 1;
+      letter-spacing: -0.5px; margin-bottom: 8px;
+    }
+    .kpi-trend {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 500;
+    }
+    .kpi-trend.up { color: var(--green); }
+    .kpi-trend.down { color: var(--accent); }
+    .kpi-trend .vs { color: var(--muted); font-weight: 400; margin-left: 2px; }
+
+    /* ===== GRIDS ===== */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media (max-width: 960px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+    /* ===== CARDS ===== */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 5px; padding: 18px 20px;
+    }
+
+    .card-header {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; margin-bottom: 14px;
+    }
+    .card-header-left h3 {
+      font-family: var(--font-display);
+      font-size: 14px; font-weight: 600;
+      letter-spacing: -0.1px;
+    }
+    .card-header-left .card-sub {
+      font-size: 11px; color: var(--muted); margin-top: 2px;
+    }
+    .card-header-right { display: flex; gap: 6px; align-items: center; }
+
+    .chip {
+      font-size: 11px; font-weight: 600; padding: 3px 9px;
+      border-radius: 3px; background: var(--surface2);
+      border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+    }
+    .chip.active { background: var(--accent-soft); color: var(--accent); border-color: rgba(181,69,27,0.2); }
+
+    .chart-wrap { position: relative; width: 100%; }
+    .chart-h-200 { height: 200px; }
+    .chart-h-240 { height: 240px; }
+    .chart-h-280 { height: 280px; }
+
+    /* ===== ALERTS ===== */
+    .alert-list { display: flex; flex-direction: column; gap: 8px; }
+    .alert-item {
+      padding: 11px 13px; border-radius: 5px; font-size: 12px;
+      line-height: 1.5; display: flex; gap: 10px; align-items: flex-start;
+    }
+    .alert-critical { background: var(--red-bg); border: 1px solid rgba(181,69,27,0.12); }
+    .alert-high { background: var(--gold-bg); border: 1px solid rgba(176,138,30,0.12); }
+    .alert-medium { background: var(--surface2); border: 1px solid var(--border); }
+    .alert-icon {
+      width: 26px; height: 26px; border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; flex-shrink: 0;
+    }
+    .alert-icon svg { width: 14px; height: 14px; }
+    .alert-icon.critical { background: rgba(181,69,27,0.1); color: var(--accent); }
+    .alert-icon.high { background: rgba(176,138,30,0.1); color: var(--gold); }
+    .alert-icon.medium { background: var(--surface2); color: var(--muted); }
+    .alert-body { flex: 1; }
+    .alert-title { font-weight: 600; font-size: 12px; margin-bottom: 2px; }
+    .alert-desc { color: var(--muted); font-size: 11px; line-height: 1.5; }
+
+    /* ===== TAGS ===== */
+    .tag {
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 3px;
+      font-size: 10.5px; font-weight: 600;
+      letter-spacing: 0.1px;
+    }
+    .tag-critical { background: var(--red-bg); color: var(--red-text); }
+    .tag-high { background: var(--gold-bg); color: var(--gold-text); }
+    .tag-medium { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .tag-green { background: var(--green-bg); color: var(--green-text); }
+    .tag-teal { background: var(--teal-bg); color: var(--teal-text); }
+    .tag-sage { background: var(--sage-bg); color: var(--sage-text); }
+    .tag-gray { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+    /* ===== TABLES ===== */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th {
+      font-family: var(--font-mono);
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      padding: 8px 12px; border-bottom: 1px solid var(--border);
+      text-align: left; background: var(--surface2);
+    }
+    th:first-child { border-radius: 4px 0 0 0; }
+    th:last-child { border-radius: 0 4px 0 0; }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface2); }
+
+    .reviewer-avatar {
+      width: 28px; height: 28px; border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; flex-shrink: 0;
+    }
+    .reviewer-info { display: flex; align-items: center; gap: 8px; }
+    .reviewer-name { font-weight: 600; font-size: 12px; }
+    .reviewer-location { font-size: 10.5px; color: var(--muted); }
+    .star-row { display: flex; gap: 1px; flex-shrink: 0; }
+    .star { font-size: 12px; }
+    .star.filled { color: var(--gold); }
+    .star.empty { color: var(--border); }
+
+    /* ===== REVIEW FILTERS ===== */
+    .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+    .filter-input {
+      flex: 1; min-width: 200px; height: 34px; padding: 0 12px;
+      border: 1px solid var(--border); border-radius: 4px;
+      background: var(--surface2); color: var(--text); font-size: 12px; outline: none;
+      font-family: var(--font-body);
+    }
+    .filter-input:focus { border-color: var(--accent); background: #fff; }
+    .filter-select {
+      height: 34px; padding: 0 10px;
+      border: 1px solid var(--border); border-radius: 4px;
+      background: var(--surface2); color: var(--text);
+      font-size: 12px; outline: none; cursor: pointer;
+      font-family: var(--font-body);
+    }
+    .filter-select:focus { border-color: var(--accent); }
+    .filter-btn {
+      height: 34px; padding: 0 14px; border-radius: 4px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text); font-size: 12px; cursor: pointer; font-weight: 500;
+      font-family: var(--font-body);
+    }
+    .filter-btn:hover { background: var(--border); }
+    .filter-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+    .filter-btn.primary:hover { background: var(--accent-hover); }
+    .filter-btn.success { background: var(--green); color: #fff; border-color: var(--green); }
+
+    /* ===== SELECT DROPDOWN ===== */
+    .aspect-select {
+      width: 100%; height: 34px; padding: 0 10px; margin-bottom: 12px;
+      border: 1px solid var(--border); border-radius: 4px;
+      background: var(--surface2); color: var(--text); font-size: 12px; outline: none;
+      font-family: var(--font-body);
+    }
+
+    /* ===== SUMMARY BOX ===== */
+    .summary-box {
+      background: var(--surface2); border-radius: 5px;
+      padding: 14px 16px; font-size: 13px; line-height: 1.7;
+      color: var(--text); border: 1px solid var(--border);
+    }
+    .summary-box strong { color: var(--accent); }
+
+    /* ===== STATUS BAR ===== */
+    .status-bar {
+      padding: 8px 28px; border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 10px; color: var(--muted);
+      display: flex; gap: 12px; flex-wrap: wrap; background: var(--surface);
+    }
+    .status-bar .ok { color: var(--green); }
+    .status-bar .err { color: var(--accent); }
+
+    /* ===== LOADING ===== */
+    .loading {
+      display: flex; align-items: center; justify-content: center;
+      height: 120px; color: var(--muted); font-size: 12px;
+    }
+    .loading::before {
+      content: ''; width: 14px; height: 14px;
+      border: 2px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty { color: var(--muted); font-size: 12px; text-align: center; }
+
+    /* ===== REVIEW DETAIL (inline) ===== */
+    .review-detail-row td {
+      padding: 0 !important;
+      border-bottom: 1px solid var(--border) !important;
+      background: var(--surface2);
+    }
+    .review-detail-inner {
+      padding: 16px 14px;
+      animation: slideDown 0.2s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* ===== REDUCED MOTION ===== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+
+    /* ===== FOCUS VISIBLE ===== */
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ===== ACTION BUTTONS ===== */
+    .action-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 28px; padding: 0 10px; border-radius: 4px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text); font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; font-family: var(--font-body);
+      white-space: nowrap;
+    }
+    .action-btn:hover { background: var(--border); }
+    .action-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .action-btn.primary:hover { background: var(--accent-hover); }
+    .action-btn.green { background: var(--green); color: #fff; border-color: var(--green); }
+    .action-btn.green:hover { opacity: 0.85; }
+    .action-btn.teal { background: var(--teal); color: #fff; border-color: var(--teal); }
+    .action-btn.teal:hover { opacity: 0.85; }
+    .action-btn svg { width: 13px; height: 13px; }
+    .action-btn.labeled { padding: 0 12px; gap: 6px; }
+    .action-btn.labeled svg { width: 12px; height: 12px; }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(28,22,18,0.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200; animation: fadeIn 0.15s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; width: 90%; max-width: 560px; max-height: 85vh;
+      overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: modalSlide 0.2s ease;
+    }
+    @keyframes modalSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px; border-bottom: 1px solid var(--border);
+    }
+    .modal-header h3 {
+      font-family: var(--font-display); font-size: 15px; font-weight: 600;
+    }
+    .modal-close {
+      width: 28px; height: 28px; border-radius: 4px; border: none;
+      background: var(--surface2); color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+    }
+    .modal-close:hover { background: var(--border); color: var(--text); }
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      display: flex; gap: 8px; justify-content: flex-end;
+      padding: 14px 20px; border-top: 1px solid var(--border);
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-label {
+      display: block; font-size: 11px; font-weight: 600; color: var(--muted);
+      margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .form-input, .form-textarea, .form-select {
+      width: 100%; padding: 8px 12px; border: 1px solid var(--border);
+      border-radius: 4px; background: var(--surface2); color: var(--text);
+      font-size: 12px; font-family: var(--font-body); outline: none;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--accent); background: #fff; }
+    .form-textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
+
+    .draft-preview {
+      padding: 14px 16px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 5px; font-size: 12px; line-height: 1.7; white-space: pre-wrap;
+      max-height: 300px; overflow-y: auto;
+    }
+
+    /* ===== ACTIONS TAB: Summary Strip ===== */
+    .actions-summary {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 800px) { .actions-summary { grid-template-columns: repeat(2, 1fr); } }
+    .actions-stat {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 5px; padding: 14px 16px; text-align: center;
+      transition: border-color 0.15s;
+    }
+    .actions-stat:hover { border-color: var(--border2); }
+    .actions-stat-num {
+      font-family: var(--font-display); font-size: 28px; font-weight: 700;
+      line-height: 1; letter-spacing: -0.5px; margin-bottom: 4px;
+    }
+    .actions-stat-label {
+      font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--muted);
+    }
+    .actions-stat.open .actions-stat-num { color: var(--accent); }
+    .actions-stat.in-progress .actions-stat-num { color: var(--gold); }
+    .actions-stat.resolved .actions-stat-num { color: var(--green); }
+    .actions-stat.total .actions-stat-num { color: var(--text); }
+
+    /* ===== ACTIONS TAB: Filter Bar ===== */
+    .actions-filter-bar {
+      display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .actions-filter-bar .filter-select { height: 32px; font-size: 11.5px; }
+
+    /* ===== ACTIONS TAB: Ledger Card ===== */
+    .action-ledger {
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .action-ledger-item {
+      display: flex; gap: 0; align-items: stretch;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 0; margin-bottom: -1px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      position: relative;
+    }
+    .action-ledger-item:first-child { border-radius: 5px 5px 0 0; }
+    .action-ledger-item:last-child { border-radius: 0 0 5px 5px; margin-bottom: 0; }
+    .action-ledger-item:only-child { border-radius: 5px; }
+    .action-ledger-item:hover { border-color: var(--border2); z-index: 1; }
+
+    .action-priority-stripe {
+      width: 4px; flex-shrink: 0; border-radius: 5px 0 0 5px;
+    }
+    .action-priority-stripe.critical { background: var(--accent); }
+    .action-priority-stripe.high { background: var(--gold); }
+    .action-priority-stripe.medium { background: var(--border2); }
+    .action-priority-stripe.low { background: var(--sage); }
+
+    .action-ledger-content {
+      flex: 1; min-width: 0; padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .action-ledger-top {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .action-ledger-title {
+      font-size: 12.5px; font-weight: 600; color: var(--text);
+      flex: 1; min-width: 0;
+    }
+    .action-status-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 3px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.4px; flex-shrink: 0;
+    }
+    .action-status-badge.open { background: var(--red-bg); color: var(--red-text); }
+    .action-status-badge.in_progress { background: var(--gold-bg); color: var(--gold-text); }
+    .action-status-badge.resolved { background: var(--green-bg); color: var(--green-text); }
+    .action-status-badge.dismissed { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .action-status-badge .badge-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+    }
+    .action-status-badge.open .badge-dot { background: var(--accent); }
+    .action-status-badge.in_progress .badge-dot { background: var(--gold); }
+    .action-status-badge.resolved .badge-dot { background: var(--green); }
+    .action-status-badge.dismissed .badge-dot { background: var(--muted); }
+
+    .action-ledger-desc {
+      font-size: 11.5px; color: var(--muted); line-height: 1.55;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .action-ledger-desc.expanded { -webkit-line-clamp: unset; }
+
+    .action-ledger-meta {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      font-size: 10.5px; color: var(--muted);
+    }
+    .action-ledger-meta .meta-tag {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 1px 6px; border-radius: 3px;
+      background: var(--surface2); border: 1px solid var(--border);
+    }
+    .action-ledger-meta .meta-assignee { color: var(--teal); font-weight: 500; }
+    .action-ledger-meta .meta-due { color: var(--gold); }
+
+    .action-ledger-controls {
+      display: flex; align-items: center; gap: 4px;
+      padding: 0 12px; border-left: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    /* ===== ACTIONS TAB: Empty State ===== */
+    .actions-empty {
+      text-align: center; padding: 52px 24px; color: var(--muted);
+      background: var(--surface); border: 1px dashed var(--border2);
+      border-radius: 5px;
+    }
+    .actions-empty-icon {
+      width: 48px; height: 48px; margin: 0 auto 16px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    }
+    .actions-empty-icon svg { width: 22px; height: 22px; color: var(--border2); }
+    .actions-empty h4 {
+      font-family: var(--font-display); font-size: 14px; font-weight: 600;
+      color: var(--text); margin-bottom: 4px;
+    }
+    .actions-empty p { font-size: 12px; line-height: 1.6; max-width: 320px; margin: 0 auto; }
+    .actions-empty .action-btn { margin-top: 14px; }
+
+    /* ===== KPI CTA ===== */
+    .kpi-cta {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10.5px; font-weight: 600; color: var(--accent);
+      cursor: pointer; margin-top: 6px; text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .kpi-cta:hover { opacity: 0.7; }
+    .kpi-cta svg { width: 11px; height: 11px; }
+
+    /* ===== CHART INSIGHT CTA ===== */
+    .chart-insight-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 26px; padding: 0 9px; border-radius: 4px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text); font-size: 10.5px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; font-family: var(--font-body);
+      white-space: nowrap;
+    }
+    .chart-insight-btn:hover { background: var(--border); }
+    .chart-insight-btn svg { width: 12px; height: 12px; }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <!-- Torana-inspired arch motif -->
+      <svg class="torana-motif" viewBox="0 0 200 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 44 Q10 20 30 12 Q50 4 100 4 Q150 4 170 12 Q190 20 190 44" stroke="rgba(176,138,30,0.35)" stroke-width="1" fill="none"/>
+        <path d="M20 44 Q20 24 38 16 Q56 8 100 8 Q144 8 162 16 Q180 24 180 44" stroke="rgba(176,138,30,0.2)" stroke-width="0.75" fill="none"/>
+        <path d="M30 44 Q30 28 46 20 Q62 12 100 12 Q138 12 154 20 Q170 28 170 44" stroke="rgba(176,138,30,0.12)" stroke-width="0.5" fill="none"/>
+        <circle cx="100" cy="4" r="2" fill="rgba(176,138,30,0.3)"/>
+        <circle cx="60" cy="8" r="1.2" fill="rgba(176,138,30,0.2)"/>
+        <circle cx="140" cy="8" r="1.2" fill="rgba(176,138,30,0.2)"/>
+        <line x1="100" y1="12" x2="100" y2="44" stroke="rgba(176,138,30,0.08)" stroke-width="0.5"/>
+      </svg>
+      <div class="sidebar-logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(176,138,30,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <div class="name">Heritage Pulse</div>
+          <div class="sub">Pashupatinath Temple</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Overview</div>
+      <a class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" data-tab="reviews" onclick="switchTab('reviews')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Reviews
+        <span class="nav-badge" id="reviewCount">—</span>
+      </a>
+      <div class="nav-section" style="margin-top:8px">Intelligence</div>
+      <a class="nav-item" data-tab="analysis" onclick="switchTab('analysis')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Sentiment Analysis
+      </a>
+      <a class="nav-item" data-tab="recommendations" onclick="switchTab('recommendations')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Recommendations
+      </a>
+      <div class="nav-section" style="margin-top:8px">Management</div>
+      <a class="nav-item" data-tab="actions" onclick="switchTab('actions')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Actions
+        <span class="nav-badge" id="actionCount">0</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-avatar">PT</div>
+      <div class="user-info">
+        <div class="user-name">Pashupatinath</div>
+        <div class="user-role">Site Manager</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h1 id="pageTitle">Dashboard</h1>
+        <p id="pageSubtitle">Overview of your heritage site</p>
+      </div>
+      <div class="topbar-actions">
+        <div class="live-badge"><div class="live-dot"></div> Live</div>
+        <div class="topbar-flag">🇳🇵</div>
+        <div class="topbar-btn" title="Notifications">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="topbar-notif-dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page">
+
+      <!-- ==================== DASHBOARD TAB ==================== -->
+      <div class="tab-view active" id="tab-dashboard">
+
+        <div class="kpi-grid" id="kpiRow">
+          <div class="kpi-card"><div class="loading"></div></div>
+          <div class="kpi-card"><div class="loading"></div></div>
+          <div class="kpi-card"><div class="loading"></div></div>
+          <div class="kpi-card"><div class="loading"></div></div>
+        </div>
+
+        <!-- Health Alerts -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <div class="card-header-left">
+              <h3>Health Alerts</h3>
+              <div class="card-sub">Aspects requiring attention</div>
+            </div>
+          </div>
+          <div class="alert-list" id="alertList"><div class="loading"></div></div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Reviews Over Time -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-left">
+                <h3>Reviews Over Time</h3>
+                <div class="card-sub">Yearly volume with avg rating</div>
+              </div>
+            </div>
+            <div class="chart-wrap chart-h-240"><canvas id="volumeLine"></canvas></div>
+          </div>
+          <!-- Rating Distribution -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-left">
+                <h3>Rating Distribution</h3>
+                <div class="card-sub">Star rating breakdown</div>
+              </div>
+            </div>
+            <div class="chart-wrap chart-h-240"><canvas id="sentimentDonut"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Most Discussed Topics -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <div class="card-header-left">
+              <h3>Most Discussed Topics</h3>
+              <div class="card-sub">What visitors are talking about</div>
+            </div>
+          </div>
+          <div class="table-wrap" id="topEntitiesTable"><div class="loading"></div></div>
+        </div>
+
+        <!-- Trip Type -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-left">
+              <h3>Visitor Segments</h3>
+              <div class="card-sub">Reviews by trip type</div>
+            </div>
+          </div>
+          <div class="chart-wrap chart-h-200"><canvas id="tripTypeBar"></canvas></div>
+        </div>
+
+      </div>
+
+      <!-- ==================== REVIEWS TAB ==================== -->
+      <div class="tab-view" id="tab-reviews">
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-left">
+              <h3>Reviews</h3>
+              <div class="card-sub">Browse, filter, and inspect visitor reviews</div>
+            </div>
+            <div class="card-header-right">
+              <button class="filter-btn success" id="reviewExport" style="font-size:11px;height:30px;padding:0 12px">⬇ Export CSV</button>
+            </div>
+          </div>
+          <div class="filter-row">
+            <input id="reviewSearch" type="text" placeholder="Search reviews..." class="filter-input" />
+            <select id="reviewSentiment" class="filter-select"><option value="">All Sentiments</option></select>
+            <select id="reviewTrip" class="filter-select"><option value="">All Trip Types</option></select>
+            <select id="reviewYear" class="filter-select"><option value="">All Years</option></select>
+            <select id="reviewRating" class="filter-select"><option value="">All Ratings</option></select>
+            <select id="reviewSort" class="filter-select">
+              <option value="date:desc">Newest First</option>
+              <option value="date:asc">Oldest First</option>
+              <option value="rating:desc">Highest Rated</option>
+              <option value="rating:asc">Lowest Rated</option>
+            </select>
+            <select id="reviewPageSize" class="filter-select">
+              <option value="10">10 / page</option>
+              <option value="20" selected>20 / page</option>
+              <option value="50">50 / page</option>
+            </select>
+            <button id="reviewReset" class="filter-btn">Reset</button>
+          </div>
+          <div id="reviewTableWrap"><div class="loading"></div></div>
+          <div id="reviewPagination" style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-size:11px;color:var(--muted)"></div>
+        </div>
+
+      </div>
+
+      <!-- ==================== ANALYSIS TAB ==================== -->
+      <div class="tab-view" id="tab-analysis">
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-left">
+                <h3>Aspect Sentiment</h3>
+                <div class="card-sub">Positive / neutral / negative by aspect</div>
+              </div>
+              <div class="card-header-right">
+                <button class="chart-insight-btn" onclick="createInsightFromChart('aspectSentiment')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Create Alert
+                </button>
+              </div>
+            </div>
+            <div class="chart-wrap chart-h-240"><canvas id="aspectStacked"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-left">
+                <h3>Aspect Trend</h3>
+                <div class="card-sub">Sentiment over time for selected aspect</div>
+              </div>
+              <div class="card-header-right">
+                <button class="chart-insight-btn" onclick="createInsightFromChart('aspectTrend')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Save Trend Insight
+                </button>
+              </div>
+            </div>
+            <select id="aspectSelect" class="aspect-select">
+              <option value="crowd_management">Crowd Management</option>
+              <option value="scenic_spot">Scenic Spot</option>
+              <option value="spiritual_authenticity">Spiritual Authenticity</option>
+              <option value="sacred_atmosphere">Sacred Atmosphere</option>
+              <option value="facility">Facility</option>
+              <option value="cultural_sensitivity">Cultural Sensitivity</option>
+              <option value="ritual_experience">Ritual Experience</option>
+              <option value="environment">Environment</option>
+              <option value="access_fairness">Access Fairness</option>
+              <option value="service">Service</option>
+            </select>
+            <div class="chart-wrap chart-h-200"><canvas id="aspectTrendLine"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Volume Trend -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <div class="card-header-left">
+              <h3>Volume Trend</h3>
+              <div class="card-sub">Review volume and sentiment over time</div>
+            </div>
+            <div class="card-header-right">
+              <button class="chart-insight-btn" onclick="createInsightFromChart('volumeTrend')" style="margin-right:6px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Save Trend Insight
+              </button>
+              <select id="volumeGranularity" class="filter-select" style="height:30px;font-size:11px">
+                <option value="quarterly">Quarterly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
+          </div>
+          <div class="chart-wrap chart-h-240"><canvas id="volumeTrendLine"></canvas></div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Aspect Radar -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-left">
+                <h3>Aspect Radar</h3>
+                <div class="card-sub">Sentiment profile across aspects</div>
+              </div>
+              <div class="card-header-right">
+                <button class="chart-insight-btn" onclick="createInsightFromChart('aspectRadar')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Identify Weak Areas
+                </button>
+              </div>
+            </div>
+            <div class="chart-wrap chart-h-280"><canvas id="aspectRadar"></canvas></div>
+          </div>
+          <!-- Centrality -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-left">
+                <h3>Entity Centrality</h3>
+                <div class="card-sub">Average degree centrality by type</div>
+              </div>
+              <div class="card-header-right">
+                <button class="chart-insight-btn" onclick="createInsightFromChart('centrality')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Save Insight
+                </button>
+              </div>
+            </div>
+            <div class="chart-wrap chart-h-240"><canvas id="centralityBar"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Communities -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-left">
+              <h3>Community Distribution</h3>
+              <div class="card-sub">Knowledge graph community sizes</div>
+            </div>
+            <div class="card-header-right">
+              <button class="chart-insight-btn" onclick="createInsightFromChart('communities')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Save Insight
+              </button>
+            </div>
+          </div>
+          <div class="chart-wrap chart-h-240"><canvas id="communityBar"></canvas></div>
+        </div>
+
+      </div>
+
+      <!-- ==================== RECOMMENDATIONS TAB ==================== -->
+      <div class="tab-view" id="tab-recommendations">
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-left">
+              <h3>Heritage Recommendations</h3>
+              <div class="card-sub">AI-powered analysis for heritage management</div>
+            </div>
+            <div class="card-header-right"><span class="tag tag-teal">✦ AI Generated</span></div>
+          </div>
+          <div id="llmRecommendations"><div class="loading"></div></div>
+        </div>
+
+      </div>
+
+      <!-- ==================== ACTIONS TAB ==================== -->
+      <div class="tab-view" id="tab-actions">
+
+        <!-- Summary Strip -->
+        <div class="actions-summary" id="actionsSummary">
+          <div class="actions-stat open"><div class="actions-stat-num" id="actCountOpen">0</div><div class="actions-stat-label">Open</div></div>
+          <div class="actions-stat in-progress"><div class="actions-stat-num" id="actCountProgress">0</div><div class="actions-stat-label">In Progress</div></div>
+          <div class="actions-stat resolved"><div class="actions-stat-num" id="actCountResolved">0</div><div class="actions-stat-label">Resolved</div></div>
+          <div class="actions-stat total"><div class="actions-stat-num" id="actCountTotal">0</div><div class="actions-stat-label">Total</div></div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="actions-filter-bar">
+          <select id="actionFilterStatus" class="filter-select">
+            <option value="">All Status</option>
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="dismissed">Dismissed</option>
+          </select>
+          <select id="actionFilterSource" class="filter-select">
+            <option value="">All Sources</option>
+            <option value="alert">Health Alert</option>
+            <option value="insight">Insight</option>
+            <option value="recommendation">Recommendation</option>
+            <option value="review">Review</option>
+            <option value="manual">Manual</option>
+          </select>
+          <div style="flex:1"></div>
+          <button class="action-btn primary labeled" onclick="openCreateActionModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Action
+          </button>
+        </div>
+
+        <!-- Action Items Ledger -->
+        <div id="actionItemsList"></div>
+
+      </div>
+
+    </div><!-- /page -->
+
+    <div class="status-bar" id="statusBar"></div>
+  </div><!-- /main -->
+
+  <!-- ===== MODAL CONTAINER ===== -->
+  <div id="modalContainer"></div>
+
+  <script>
+    const API_URL = window.location.origin.startsWith('http') ? window.location.origin : 'http://localhost:8000';
+    const SB_URL = 'https://vtnbnnaxedtsqfcjubjo.supabase.co';
+    const SB_KEY = 'sb_publishable_l8iKPL0bZeuDW5lwM9RXjw_IfikAYId';
+    const charts = {};
+    const statuses = {};
+
+    function sb(table, select = '*', filters = {}) {
+      let url = `${SB_URL}/rest/v1/${table}?select=${select}`;
+      for (const [k, v] of Object.entries(filters)) {
+        if (v !== undefined && v !== null && v !== '') url += `&${k}=${encodeURIComponent(v)}`;
+      }
+      return fetch(url, { headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` } }).then(r => r.json());
+    }
+    function sbMetric(family, key) {
+      return sb('metrics_current', 'metric_value', { metric_family: `eq.${family}`, metric_key: `eq.${key}` }).then(d => d[0]?.metric_value);
+    }
+    function setStatus(id, ok, msg) {
+      statuses[id] = { ok, msg };
+      document.getElementById('statusBar').innerHTML = Object.entries(statuses).map(([k, s]) =>
+        `<span class="${s.ok ? 'ok' : 'err'}">${k}: ${s.msg}</span>`).join('');
+    }
+
+    const COLORS = {
+      accent: '#B5451B', green: '#4A7A44', red: '#B5451B', amber: '#B08A1E',
+      teal: '#3D7A6A', gold: '#B08A1E', sage: '#6A8A5E',
+    };
+    const PALETTE = ['#B5451B', '#B08A1E', '#3D7A6A', '#6A8A5E', '#7A6014', '#4A7A44', '#366130', '#2A5E50'];
+    const chartData = {};
+
+    const BASE_OPTS = {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#7A6E5E', font: { size: 11, family: 'Inter, system-ui, sans-serif' }, padding: 12, boxWidth: 10, boxHeight: 10 } } },
+      scales: {
+        x: { ticks: { color: '#9A8E7E', font: { size: 10 } }, grid: { color: '#E5DFD5' }, border: { color: '#D5CABC' } },
+        y: { ticks: { color: '#9A8E7E', font: { size: 10 } }, grid: { color: '#E5DFD5' }, border: { color: '#D5CABC' } }
+      }
+    };
+
+    function destroyChart(k) { if (charts[k]) { charts[k].destroy(); charts[k] = null; } }
+    const C = (id, cfg) => { destroyChart(id); charts[id] = new Chart(document.getElementById(id).getContext('2d'), cfg); };
+
+    // ===== TAB SWITCHING =====
+    const tabTitles = {
+      dashboard: ['Dashboard', 'Overview of your heritage site'],
+      reviews: ['Reviews', 'Browse, filter, and inspect visitor feedback'],
+      analysis: ['Sentiment Analysis', 'Aspect-level sentiment breakdown'],
+      recommendations: ['Recommendations', 'AI-powered heritage management insights'],
+      actions: ['Actions', 'Manage tasks from insights, alerts, and reviews'],
+    };
+    const loadedTabs = {};
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+      const [title, sub] = tabTitles[tab] || ['', ''];
+      document.getElementById('pageTitle').textContent = title;
+      document.getElementById('pageSubtitle').textContent = sub;
+
+      if (!loadedTabs[tab]) {
+        loadedTabs[tab] = true;
+        if (tab === 'reviews') { loadReviewFilters().then(() => loadReviews()); }
+        if (tab === 'analysis') { loadAspectStacked(); loadAspectTrend(); loadVolumeTrendLine(); loadAspectRadar(); loadCentrality(); loadCommunities(); }
+        if (tab === 'recommendations') { loadLLMRecommendations(); }
+        if (tab === 'actions') { renderActionItems(); }
+      } else if (tab === 'actions') {
+        renderActionItems();
+      }
+    }
+
+    // ===== KPIs =====
+    async function loadKPIs() {
+      try {
+        const [kpi, sentiment] = await Promise.all([
+          sbMetric('overview', 'kpi_summary'),
+          sbMetric('overview', 'sentiment_share')
+        ]);
+        const pos = sentiment?.find(s => s.sentiment_class === 'positive');
+        const neg = sentiment?.find(s => s.sentiment_class === 'negative');
+        document.getElementById('reviewCount').textContent = kpi.total_reviews.toLocaleString();
+        const kpis = [
+          { v: kpi.total_reviews.toLocaleString(), l: 'Total Reviews', icon: 'reviews', cls: 'blue', trend: '+12.5% this year', up: true, cta: 'View Trend →', ctaAction: "switchTab('reviews')" },
+          { v: kpi.avg_rating + ' ★', l: 'Average Rating', icon: 'rating', cls: 'green', trend: 'Out of 5.0', up: true, cta: 'Analyze Low Ratings →', ctaAction: "switchTab('analysis')" },
+          { v: (pos?.percentage || 0) + '%', l: 'Positive Sentiment', icon: 'positive', cls: 'green', trend: 'of all reviews', up: true, cta: 'Explore Drivers →', ctaAction: "switchTab('analysis')" },
+          { v: (neg?.percentage || 0) + '%', l: 'Needs Attention', icon: 'attention', cls: 'amber', trend: 'Negative reviews', up: false, cta: 'Investigate →', ctaAction: "switchTab('reviews');document.getElementById('reviewSentiment').value='negative';document.getElementById('reviewSentiment').dispatchEvent(new Event('change'))" },
+        ];
+        const icons = {
+          reviews: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+          rating: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+          positive: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
+          attention: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+        };
+        document.getElementById('kpiRow').innerHTML = kpis.map(k => `
+          <div class="kpi-card">
+            <div class="kpi-icon ${k.cls}">${icons[k.icon]}</div>
+            <div class="kpi-label">${k.l}</div>
+            <div class="kpi-value">${k.v}</div>
+            <div class="kpi-trend ${k.up ? 'up' : 'down'}">${k.up ? '↑' : '↓'} ${k.trend}</div>
+            <div class="kpi-cta" onclick="${k.ctaAction}">${k.cta} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+          </div>`).join('');
+        setStatus('kpis', true, 'OK');
+      } catch (e) {
+        document.getElementById('kpiRow').innerHTML = `<div class="kpi-card"><div class="empty">Error loading KPIs</div></div>`;
+        setStatus('kpis', false, e.message);
+      }
+    }
+
+    // ===== VOLUME LINE =====
+    async function loadVolumeLine() {
+      try {
+        const d = await sbMetric('overview', 'reviews_over_time');
+        C('volumeLine', {
+          type: 'bar',
+          data: {
+            labels: d.map(r => r.year),
+            datasets: [
+              { type: 'bar', label: 'Reviews', data: d.map(r => r.count), backgroundColor: 'rgba(181,69,27,0.12)', borderColor: 'rgba(181,69,27,0.35)', borderWidth: 1, borderRadius: 3, yAxisID: 'y' },
+              { type: 'line', label: 'Avg Rating', data: d.map(r => r.avg_rating), borderColor: '#B08A1E', borderWidth: 1.5, tension: 0.4, yAxisID: 'y1', pointRadius: 3, pointBackgroundColor: '#B08A1E', fill: false }
+            ]
+          },
+          options: {
+            ...BASE_OPTS, interaction: { mode: 'index', intersect: false },
+            scales: { x: BASE_OPTS.scales.x, y: { ...BASE_OPTS.scales.y, position: 'left', title: { display: true, text: 'Volume', color: '#9A8E7E', font: { size: 10 } } }, y1: { position: 'right', min: 3, max: 5, title: { display: true, text: 'Rating', color: '#9A8E7E', font: { size: 10 } }, ticks: { color: '#9A8E7E', font: { size: 10 } }, grid: { display: false } } }
+          }
+        });
+        setStatus('volume', true, 'OK');
+      } catch (e) { setStatus('volume', false, e.message); }
+    }
+
+    // ===== SENTIMENT DONUT =====
+    async function loadSentimentDonut() {
+      try {
+        const d = await sbMetric('overview', 'rating_distribution');
+        C('sentimentDonut', {
+          type: 'doughnut',
+          data: {
+            labels: d.map(r => r.rating + ' ★'),
+            datasets: [{ data: d.map(r => r.count), backgroundColor: ['#B5451B', '#D4794A', '#B08A1E', '#6A8A5E', '#4A7A44'], borderWidth: 2, borderColor: '#FDFAF5', hoverBorderColor: '#FDFAF5' }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false, cutout: '68%',
+            plugins: { legend: { position: 'right', labels: { color: '#7A6E5E', font: { size: 11 }, padding: 10, boxWidth: 10, boxHeight: 10, generateLabels: (c) => { const ds = c.data.datasets[0]; const total = ds.data.reduce((a, b) => a + b, 0); return c.data.labels.map((l, i) => ({ text: `${l}  (${Math.round(ds.data[i] / total * 100)}%)`, fillStyle: ds.backgroundColor[i], hidden: false, index: i })); } } } }
+          }
+        });
+        setStatus('donut', true, 'OK');
+      } catch (e) { setStatus('donut', false, e.message); }
+    }
+
+    // ===== TRIP TYPE =====
+    async function loadTripTypeBar() {
+      try {
+        const d = await sbMetric('overview', 'reviews_by_trip_type');
+        C('tripTypeBar', {
+          type: 'bar',
+          data: { labels: d.map(t => t.trip_type || 'unknown'), datasets: [{ data: d.map(t => t.count), backgroundColor: PALETTE, borderRadius: 3 }] },
+          options: { ...BASE_OPTS, plugins: { legend: { display: false } }, scales: { x: { ...BASE_OPTS.scales.x, ticks: { ...BASE_OPTS.scales.x.ticks, maxRotation: 40 } }, y: { ...BASE_OPTS.scales.y } } }
+        });
+        setStatus('trip', true, 'OK');
+      } catch (e) { setStatus('trip', false, e.message); }
+    }
+
+    // ===== TOP ENTITIES =====
+    async function loadTopEntities() {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/analytics/charts/top-entities?limit=8`);
+        if (!res.ok) throw new Error(res.statusText);
+        const d = await res.json();
+        const typeColors = { scenic_spot: COLORS.green, ritual: COLORS.gold, sacred_space: COLORS.teal, spiritual_emotion: COLORS.sage, problem: COLORS.accent, offering: COLORS.gold, festival: COLORS.amber, actor: COLORS.teal };
+        document.getElementById('topEntitiesTable').innerHTML = `<table>
+          <thead><tr><th>#</th><th>Entity</th><th>Type</th><th>Mentions</th></tr></thead>
+          <tbody>${d.items.map(e => {
+            const c = typeColors[e.entity_type] || '#7A6E5E';
+            return `<tr>
+              <td style="color:var(--muted);font-weight:600;font-family:var(--font-mono);font-size:10px">${String(e.rank).padStart(2,'0')}</td>
+              <td style="font-weight:600">${e.display_name}</td>
+              <td><span class="tag" style="background:${c}14;color:${c};border:1px solid ${c}25">${e.entity_type.replace(/_/g, ' ')}</span></td>
+              <td style="font-weight:600;color:var(--accent);font-family:var(--font-mono);font-size:11px">${e.mention_count}</td>
+            </tr>`;
+          }).join('')}</tbody></table>`;
+        setStatus('entities', true, 'OK');
+      } catch (e) { document.getElementById('topEntitiesTable').innerHTML = `<div class="empty">Error: ${e.message}</div>`; setStatus('entities', false, e.message); }
+    }
+
+    // ===== ALERTS =====
+    async function loadAlerts() {
+      try {
+        const d = await sbMetric('aspect_intelligence', 'aspect_alerts');
+        const icons = {
+          critical: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+          high: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+          medium: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+        };
+        document.getElementById('alertList').innerHTML = d.map((a, idx) => {
+          const sev = a.negative_pct > 60 ? 'critical' : a.negative_pct > 30 ? 'high' : 'medium';
+          const oneLiner = a.negative_pct > 60
+            ? `Critical: ${a.negative_pct}% negative feedback — immediate attention needed for ${a.display_aspect.toLowerCase()}.`
+            : a.negative_pct > 30
+            ? `Warning: ${a.negative_pct}% of visitors express concern about ${a.display_aspect.toLowerCase()}.`
+            : `Heads up: ${a.negative_pct}% negative sentiment detected for ${a.display_aspect.toLowerCase()}, monitor closely.`;
+          return `<div class="alert-item alert-${sev}">
+            <div class="alert-icon ${sev}">${icons[sev]}</div>
+            <div class="alert-body">
+              <div class="alert-title">${a.display_aspect} <span class="tag tag-${sev}" style="margin-left:4px">${sev}</span></div>
+              <div class="alert-info" style="font-size:11px;font-weight:500;color:var(--text);margin:3px 0;opacity:0.85">${oneLiner}</div>
+              <div class="alert-desc">Negative: ${a.negative_pct}% · Score: ${a.avg_sentiment_score}</div>
+            </div>
+            <button class="action-btn" onclick='createActionFromAlert(${JSON.stringify(a).replace(/'/g, "&#39;")})' style="flex-shrink:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Create Action
+            </button>
+          </div>`;
+        }).join('');
+        setStatus('alerts', true, 'OK');
+      } catch (e) { setStatus('alerts', false, e.message); }
+    }
+
+    // ===== ASPECT STACKED =====
+    async function loadAspectStacked() {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/analytics/charts/sentiment-overview?min_mentions=10`);
+        if (!res.ok) throw new Error(res.statusText);
+        const d = await res.json();
+        chartData.aspectSentiment = d;
+        C('aspectStacked', {
+          type: 'bar',
+          data: {
+            labels: d.labels, datasets: [
+              { label: 'Positive', data: d.series.positive, backgroundColor: '#4A7A44', borderRadius: 2 },
+              { label: 'Neutral', data: d.series.neutral, backgroundColor: '#B08A1E', borderRadius: 2 },
+              { label: 'Negative', data: d.series.negative, backgroundColor: '#B5451B', borderRadius: 2 },
+            ]
+          },
+          options: { ...BASE_OPTS, scales: { x: { stacked: true, ticks: { color: '#9A8E7E', font: { size: 9 }, maxRotation: 45 }, grid: { color: '#E5DFD5' }, border: { color: '#D5CABC' } }, y: { stacked: true, max: 100, ticks: { color: '#9A8E7E', callback: v => v + '%', font: { size: 10 } }, grid: { color: '#E5DFD5' }, border: { color: '#D5CABC' } } } }
+        });
+        setStatus('stacked', true, 'OK');
+      } catch (e) { setStatus('stacked', false, e.message); }
+    }
+
+    // ===== ASPECT TREND =====
+    async function loadAspectTrend() {
+      try {
+        const aspect = document.getElementById('aspectSelect').value;
+        const res = await fetch(`${API_URL}/api/v1/analytics/charts/aspect-trend/${encodeURIComponent(aspect)}`);
+        if (!res.ok) throw new Error(res.statusText);
+        const d = await res.json();
+        chartData.aspectTrend = d;
+        C('aspectTrendLine', {
+          type: 'line',
+          data: {
+            labels: d.trend_by_year.map(t => t.year), datasets: [
+              { label: 'Positive %', data: d.trend_by_year.map(t => t.positive_pct), borderColor: '#4A7A44', backgroundColor: 'rgba(74,122,68,0.06)', fill: true, tension: 0.4, pointRadius: 3 },
+              { label: 'Negative %', data: d.trend_by_year.map(t => t.negative_pct), borderColor: '#B5451B', backgroundColor: 'rgba(181,69,27,0.05)', fill: true, tension: 0.4, pointRadius: 3 },
+            ]
+          },
+          options: { ...BASE_OPTS, scales: { x: BASE_OPTS.scales.x, y: { ...BASE_OPTS.scales.y, max: 100, ticks: { ...BASE_OPTS.scales.y.ticks, callback: v => v + '%' } } } }
+        });
+        setStatus('trend', true, `OK — ${d.display_aspect}`);
+      } catch (e) { setStatus('trend', false, e.message); }
+    }
+
+    // ===== VOLUME TREND LINE =====
+    async function loadVolumeTrendLine() {
+      try {
+        const granularity = document.getElementById('volumeGranularity').value;
+        const res = await fetch(`${API_URL}/api/v1/analytics/charts/volume-trend?granularity=${granularity}`);
+        if (!res.ok) throw new Error(res.statusText);
+        const d = await res.json();
+        chartData.volumeTrend = d;
+        C('volumeTrendLine', {
+          type: 'bar',
+          data: {
+            labels: d.data.map(p => p.label),
+            datasets: [
+              { type: 'bar', label: 'Volume', data: d.data.map(p => p.volume), backgroundColor: 'rgba(61,122,106,0.15)', borderColor: 'rgba(61,122,106,0.4)', borderWidth: 1, borderRadius: 3, yAxisID: 'y', order: 2 },
+              { type: 'line', label: 'Avg Rating', data: d.data.map(p => p.avg_rating), borderColor: '#B08A1E', borderWidth: 1.5, tension: 0.4, yAxisID: 'y1', pointRadius: 2, pointBackgroundColor: '#B08A1E', fill: false, order: 1 },
+              { type: 'line', label: 'Positive %', data: d.data.map(p => p.positive_pct), borderColor: '#4A7A44', borderWidth: 1.5, tension: 0.4, yAxisID: 'y2', pointRadius: 2, pointBackgroundColor: '#4A7A44', fill: false, order: 0, hidden: true }
+            ]
+          },
+          options: {
+            ...BASE_OPTS, interaction: { mode: 'index', intersect: false },
+            scales: {
+              x: { ...BASE_OPTS.scales.x, ticks: { ...BASE_OPTS.scales.x.ticks, maxRotation: 45 } },
+              y: { ...BASE_OPTS.scales.y, position: 'left', title: { display: true, text: 'Volume', color: '#9A8E7E', font: { size: 10 } } },
+              y1: { position: 'right', min: 1, max: 5, title: { display: true, text: 'Rating', color: '#9A8E7E', font: { size: 10 } }, ticks: { color: '#9A8E7E', font: { size: 10 } }, grid: { display: false } },
+              y2: { display: false, min: 0, max: 100 }
+            }
+          }
+        });
+        setStatus('volumeTrend', true, `OK — ${d.granularity}`);
+      } catch (e) { setStatus('volumeTrend', false, e.message); }
+    }
+
+    // ===== ASPECT RADAR =====
+    async function loadAspectRadar() {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/analytics/charts/aspect-radar?min_mentions=5&limit=10`);
+        if (!res.ok) throw new Error(res.statusText);
+        const d = await res.json();
+        chartData.aspectRadar = d;
+        C('aspectRadar', {
+          type: 'radar',
+          data: {
+            labels: d.aspects.map(a => a.display_aspect),
+            datasets: [
+              { label: 'Positive %', data: d.aspects.map(a => a.positive_pct), backgroundColor: 'rgba(74,122,68,0.15)', borderColor: '#4A7A44', borderWidth: 1.5, pointRadius: 3, pointBackgroundColor: '#4A7A44' },
+              { label: 'Negative %', data: d.aspects.map(a => a.negative_pct), backgroundColor: 'rgba(181,69,27,0.1)', borderColor: '#B5451B', borderWidth: 1.5, pointRadius: 3, pointBackgroundColor: '#B5451B' }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#7A6E5E', font: { size: 11 }, padding: 12, boxWidth: 10, boxHeight: 10 } } },
+            scales: {
+              r: {
+                beginAtZero: true, max: 100,
+                ticks: { color: '#9A8E7E', font: { size: 9 }, backdropColor: 'transparent', stepSize: 25 },
+                grid: { color: '#E5DFD5' },
+                pointLabels: { color: '#7A6E5E', font: { size: 10 } },
+                angleLines: { color: '#E5DFD5' }
+              }
+            }
+          }
+        });
+        setStatus('radar', true, `OK — ${d.total} aspects`);
+      } catch (e) { setStatus('radar', false, e.message); }
+    }
+
+    // ===== CENTRALITY =====
+    async function loadCentrality() {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/analytics/charts/centrality?limit=10`);
+        if (!res.ok) throw new Error(res.statusText);
+        const d = await res.json();
+        if (!d.items.length) { setStatus('centrality', true, 'No data'); return; }
+        chartData.centrality = d;
+        C('centralityBar', {
+          type: 'bar',
+          data: {
+            labels: d.items.map(i => i.entity_type.replace(/_/g, ' ')),
+            datasets: [{ data: d.items.map(i => i.avg_degree_centrality), backgroundColor: 'rgba(61,122,106,0.3)', borderColor: 'rgba(61,122,106,0.6)', borderWidth: 1, borderRadius: 3 }]
+          },
+          options: {
+            ...BASE_OPTS, indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ...BASE_OPTS.scales.x, title: { display: true, text: 'Avg Degree Centrality', color: '#9A8E7E', font: { size: 10 } } },
+              y: { ...BASE_OPTS.scales.y, ticks: { color: '#7A6E5E', font: { size: 10 } } }
+            }
+          }
+        });
+        setStatus('centrality', true, `OK — ${d.total} types`);
+      } catch (e) { setStatus('centrality', false, e.message); }
+    }
+
+    // ===== COMMUNITIES =====
+    async function loadCommunities() {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/analytics/charts/communities?limit=10`);
+        if (!res.ok) throw new Error(res.statusText);
+        const d = await res.json();
+        if (!d.items.length) { setStatus('communities', true, 'No data'); return; }
+        chartData.communities = d;
+        C('communityBar', {
+          type: 'bar',
+          data: {
+            labels: d.items.map(i => `C${i.community_id} (${i.dominant_type})`),
+            datasets: [{ data: d.items.map(i => i.size), backgroundColor: PALETTE.slice(0, d.items.length), borderRadius: 3 }]
+          },
+          options: {
+            ...BASE_OPTS,
+            plugins: { legend: { display: false }, subtitle: { display: true, text: `Modularity: ${d.modularity?.toFixed(3) || '—'} · ${d.community_count} communities`, color: '#9A8E7E', font: { size: 10 }, padding: { bottom: 8 } } },
+            scales: {
+              x: { ...BASE_OPTS.scales.x, ticks: { ...BASE_OPTS.scales.x.ticks, maxRotation: 45 } },
+              y: { ...BASE_OPTS.scales.y, title: { display: true, text: 'Size', color: '#9A8E7E', font: { size: 10 } } }
+            }
+          }
+        });
+        setStatus('communities', true, `OK — ${d.community_count} communities`);
+      } catch (e) { setStatus('communities', false, e.message); }
+    }
+
+    // ===== LLM RECOMMENDATIONS =====
+    async function loadLLMRecommendations() {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/heritage/llm-recommendations`);
+        if (!res.ok) throw new Error(res.statusText);
+        const d = await res.json();
+        const urgencyBg = { critical: 'tag-critical', high: 'tag-high', medium: 'tag-medium', low: 'tag-gray' };
+        const effortColor = { low: COLORS.green, medium: COLORS.amber, high: COLORS.accent };
+        let html = '';
+        if (d.narrative_summary) html += `<div class="summary-box" style="margin-bottom:14px;font-size:12px">${d.narrative_summary}</div>`;
+        if (d.critical_findings?.length) {
+          html += `<div style="font-family:var(--font-display);font-size:12px;font-weight:600;margin-bottom:8px;color:var(--accent)">Critical Findings</div>`;
+          d.critical_findings.forEach(f => {
+            const urg = f.urgency || 'medium';
+            html += `<div class="alert-item alert-${urg === 'critical' ? 'critical' : urg === 'high' ? 'high' : 'medium'}" style="margin-bottom:8px">
+              <div class="alert-icon ${urg === 'critical' ? 'critical' : urg === 'high' ? 'high' : 'medium'}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+              <div class="alert-body">
+                <div class="alert-title">${f.finding} <span class="tag ${urgencyBg[urg]}" style="margin-left:4px">${urg}</span></div>
+                <div class="alert-desc">${f.explanation}</div>
+                <div style="font-size:11px;margin-top:4px;color:var(--accent)">Impact: ${f.impact}</div>
+              </div>
+              <button class="action-btn" onclick='createActionFromFinding(${JSON.stringify({finding: f.finding, explanation: f.explanation, impact: f.impact, urgency: urg}).replace(/'/g, "&#39;")})' style="flex-shrink:0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Create Action
+              </button>
+            </div>`;
+          });
+        }
+        if (d.recommendations?.length) {
+          html += `<div style="font-family:var(--font-display);font-size:12px;font-weight:600;margin:14px 0 8px;color:var(--green)">Recommendations</div>`;
+          d.recommendations.forEach(r => {
+            const ec = effortColor[r.effort] || '#7A6E5E';
+            html += `<div style="padding:12px 14px;background:var(--surface2);border-radius:5px;margin-bottom:8px;border:1px solid var(--border);border-left:3px solid ${COLORS.green}">
+              <div style="font-family:var(--font-display);font-size:12px;font-weight:600;margin-bottom:4px">${r.title}</div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:6px">${r.rationale}</div>
+              <div style="font-size:11px;color:var(--green);margin-bottom:6px">Expected: ${r.expected_outcome}</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                <span class="tag" style="background:${ec}14;color:${ec};border:1px solid ${ec}25">Effort: ${r.effort}</span>
+                <span class="tag tag-medium">${r.timeline?.replace('_', ' ') || 'TBD'}</span>
+                <button class="action-btn teal" style="margin-left:auto" onclick='generateActionPlanFromRec(${JSON.stringify({title: r.title, rationale: r.rationale, expected_outcome: r.expected_outcome, effort: r.effort, timeline: r.timeline}).replace(/'/g, "&#39;")})'>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                  Generate Action Plan
+                </button>
+              </div>
+            </div>`;
+          });
+        }
+        if (!html) html = '<div class="empty">No recommendations generated</div>';
+        document.getElementById('llmRecommendations').innerHTML = html;
+        setStatus('llmRec', true, `OK — ${d.recommendations?.length || 0} recs`);
+      } catch (e) { document.getElementById('llmRecommendations').innerHTML = `<div class="empty">Error: ${e.message}</div>`; setStatus('llmRec', false, e.message); }
+    }
+
+    // ===== REVIEWS =====
+    let reviewState = { page: 1, pageSize: 20, total: 0 };
+
+    function reviewParams() {
+      const p = new URLSearchParams();
+      p.set('page', reviewState.page); p.set('page_size', reviewState.pageSize);
+      const s = document.getElementById('reviewSearch').value; if (s) p.set('search', s);
+      const sent = document.getElementById('reviewSentiment').value; if (sent) p.set('sentiment', sent);
+      const trip = document.getElementById('reviewTrip').value; if (trip) p.set('trip_type', trip);
+      const yr = document.getElementById('reviewYear').value; if (yr) p.set('year', yr);
+      const rt = document.getElementById('reviewRating').value; if (rt) p.set('rating', rt);
+      const [sortBy, sortDir] = (document.getElementById('reviewSort').value || 'date:desc').split(':');
+      p.set('sort_by', sortBy); p.set('sort_dir', sortDir);
+      return p;
+    }
+
+    async function loadReviews() {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/reviews?${reviewParams()}`);
+        if (!res.ok) throw new Error(res.statusText);
+        const d = await res.json();
+        reviewState.total = d.total;
+        if (!d.reviews.length) {
+          document.getElementById('reviewTableWrap').innerHTML = '<div class="empty">No reviews match your filters</div>';
+          document.getElementById('reviewPagination').innerHTML = '';
+          return;
+        }
+        const starsHTML = (r) => [1, 2, 3, 4, 5].map(i => `<span class="star ${i <= r ? 'filled' : 'empty'}">★</span>`).join('');
+        const sentColor = { positive: COLORS.green, neutral: COLORS.amber, negative: COLORS.accent };
+        const avatarColors = ['#B5451B', '#B08A1E', '#3D7A6A', '#6A8A5E', '#4A7A44', '#7A6014', '#366130'];
+        document.getElementById('reviewTableWrap').innerHTML = `
+          <div class="table-wrap"><table>
+            <thead><tr><th>Reviewer</th><th>Rating</th><th>Review</th><th>Date</th><th>Sentiment</th></tr></thead>
+            <tbody>${d.reviews.map((r, i) => {
+              const initials = (r.reviewer_name || 'AN').slice(0, 2).toUpperCase();
+              const avatarColor = avatarColors[i % avatarColors.length];
+              const sColor = sentColor[r.sentiment_class] || '#8A7D6D';
+              const sBg = r.sentiment_class === 'positive' ? 'var(--green-bg)' : r.sentiment_class === 'negative' ? 'var(--red-bg)' : 'var(--gold-bg)';
+              const sText = r.sentiment_class === 'positive' ? 'var(--green-text)' : r.sentiment_class === 'negative' ? 'var(--red-text)' : 'var(--gold-text)';
+              return `<tr style="cursor:pointer" onclick="loadReviewDetail('${r.review_id}', this)">
+                <td>
+                  <div class="reviewer-info">
+                    <div class="reviewer-avatar" style="background:${avatarColor}14;color:${avatarColor}">${initials}</div>
+                    <div>
+                      <div class="reviewer-name">${r.reviewer_name || 'Anonymous'}</div>
+                      <div class="reviewer-location" style="font-size:10px">${r.trip_type || 'Visitor'}</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="white-space:nowrap"><div class="star-row">${starsHTML(r.rating || 0)}</div></td>
+                <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--muted)">${r.title_clean || r.text_clean?.substring(0, 80) || '—'}</td>
+                <td style="font-size:11px;color:var(--muted);white-space:nowrap;font-family:var(--font-mono)">${r.date || '—'}</td>
+                <td><span style="padding:3px 10px;border-radius:3px;background:${sBg};color:${sText};font-size:11px;font-weight:600">${r.sentiment_class || '—'}</span></td>
+              </tr>`;
+            }).join('')}</tbody></table></div>`;
+        const totalPages = Math.ceil(d.total / reviewState.pageSize);
+        document.getElementById('reviewPagination').innerHTML = `
+          <span>Showing ${(d.page - 1) * d.page_size + 1}–${Math.min(d.page * d.page_size, d.total)} of ${d.total.toLocaleString()} reviews</span>
+          <div style="display:flex;gap:4px">
+            <button onclick="reviewGo(1)" ${d.page <= 1 ? 'disabled' : ''} class="filter-btn" style="height:30px;padding:0 8px;font-size:11px">«</button>
+            <button onclick="reviewGo(${d.page - 1})" ${d.page <= 1 ? 'disabled' : ''} class="filter-btn" style="height:30px;padding:0 8px;font-size:11px">‹</button>
+            <span style="padding:4px 10px;font-size:11px;font-family:var(--font-mono)">Page ${d.page} of ${totalPages}</span>
+            <button onclick="reviewGo(${d.page + 1})" ${d.page >= totalPages ? 'disabled' : ''} class="filter-btn" style="height:30px;padding:0 8px;font-size:11px">›</button>
+            <button onclick="reviewGo(${totalPages})" ${d.page >= totalPages ? 'disabled' : ''} class="filter-btn" style="height:30px;padding:0 8px;font-size:11px">»</button>
+          </div>`;
+        setStatus('reviews', true, `OK — ${d.total}`);
+      } catch (e) { document.getElementById('reviewTableWrap').innerHTML = `<div class="empty">Error: ${e.message}</div>`; setStatus('reviews', false, e.message); }
+    }
+
+    function reviewGo(page) {
+      const totalPages = Math.ceil(reviewState.total / reviewState.pageSize);
+      if (page < 1 || page > totalPages) return;
+      reviewState.page = page; loadReviews();
+    }
+
+    async function loadReviewDetail(reviewId, clickedRow) {
+      const tbody = clickedRow.closest('tbody');
+      const existing = tbody.querySelector('.review-detail-row');
+      if (existing) {
+        if (existing.dataset.reviewId === reviewId) { existing.remove(); return; }
+        existing.remove();
+      }
+      const detailRow = document.createElement('tr');
+      detailRow.className = 'review-detail-row';
+      detailRow.dataset.reviewId = reviewId;
+      detailRow.innerHTML = `<td colspan="5"><div class="review-detail-inner"><div class="loading"></div></div></td>`;
+      clickedRow.after(detailRow);
+      try {
+        const res = await fetch(`${API_URL}/api/v1/reviews/${reviewId}`);
+        if (!res.ok) throw new Error(res.statusText);
+        const d = await res.json();
+        const sentColor = { positive: COLORS.green, neutral: COLORS.amber, negative: COLORS.accent };
+        detailRow.innerHTML = `<td colspan="5"><div class="review-detail-inner">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+            <div>
+              <h3 style="font-family:var(--font-display);font-size:15px;font-weight:600;margin-bottom:4px">${d.title_clean || 'Untitled Review'}</h3>
+              <div style="font-size:11px;color:var(--muted);font-family:var(--font-mono)">ID: ${d.review_id} · ${d.date || 'No date'} · ${d.reviewer_name || 'Anonymous'}</div>
+            </div>
+            <button onclick="this.closest('.review-detail-row').remove()" class="filter-btn" style="height:30px;padding:0 10px;font-size:11px">✕ Close</button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+            <span class="tag tag-${d.rating >= 4 ? 'green' : d.rating >= 3 ? 'medium' : 'critical'}">${d.rating || '—'} ★</span>
+            <span class="tag" style="background:${sentColor[d.sentiment_class] || '#8A7D6D'}14;color:${sentColor[d.sentiment_class] || '#8A7D6D'};border:1px solid ${sentColor[d.sentiment_class] || '#8A7D6D'}25">${d.sentiment_class || '—'}</span>
+            ${d.trip_type ? `<span class="tag tag-medium">${d.trip_type}</span>` : ''}
+            ${d.has_sacred_content ? `<span class="tag tag-teal">Sacred</span>` : ''}
+            ${d.has_ritual ? `<span class="tag tag-sage">Ritual</span>` : ''}
+          </div>
+          <div style="padding:14px;background:#FDFAF5;border-radius:5px;font-size:13px;line-height:1.7;margin-bottom:14px;max-height:200px;overflow-y:auto;border:1px solid var(--border)">${d.text_clean || 'No text available'}</div>
+          ${d.entities?.length ? `
+            <div style="margin-bottom:14px">
+              <div style="font-family:var(--font-display);font-size:12px;font-weight:600;margin-bottom:8px">Entities Mentioned (${d.entities.length})</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                ${d.entities.map(e => `<span class="tag tag-gray" title="${e.quote || ' '}">${e.entity_name} - <span style="opacity:0.5;font-size:9.5px;font-family:var(--font-mono)">${e.entity_type}</span></span>`).join('')}
+              </div>
+            </div>` : ''}
+          ${d.review_link ? `<div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><a href="${d.review_link}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--accent);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;transition:opacity 0.15s" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">View on TripAdvisor →</a>
+            ${d.sentiment_class === 'negative' ? `<button class="action-btn teal" onclick='openDraftResponseModal("${d.review_id}")'>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Draft Response
+            </button>` : ''}
+          </div>` : ''}
+          ${!d.review_link && d.sentiment_class === 'negative' ? `<div style="margin-top:14px"><button class="action-btn teal" onclick='openDraftResponseModal("${d.review_id}")'>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Draft Response
+          </button></div>` : ''}
+        </div></td>`;
+      } catch (e) { detailRow.innerHTML = `<td colspan="5"><div class="review-detail-inner"><div class="empty">Error: ${e.message}</div></div></td>`; }
+    }
+
+    async function loadReviewFilters() {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/reviews/filters`);
+        if (!res.ok) throw new Error(res.statusText);
+        const d = await res.json();
+        const fill = (id, opts) => { const sel = document.getElementById(id); opts.forEach(o => { const op = document.createElement('option'); op.value = o; op.textContent = o; sel.appendChild(op); }); };
+        fill('reviewSentiment', d.sentiments);
+        fill('reviewTrip', d.trip_types);
+        fill('reviewYear', d.years);
+        for (let r = d.rating_range.min; r <= d.rating_range.max; r++) { const op = document.createElement('option'); op.value = r; op.textContent = r + ' ★'; document.getElementById('reviewRating').appendChild(op); }
+      } catch (e) { setStatus('reviewFilters', false, e.message); }
+    }
+
+    let reviewDebounce;
+    document.getElementById('reviewSearch').addEventListener('input', () => {
+      clearTimeout(reviewDebounce); reviewDebounce = setTimeout(() => { reviewState.page = 1; loadReviews(); }, 400);
+    });
+    ['reviewSentiment', 'reviewTrip', 'reviewYear', 'reviewRating', 'reviewSort'].forEach(id =>
+      document.getElementById(id).addEventListener('change', () => { reviewState.page = 1; loadReviews(); })
+    );
+    document.getElementById('reviewPageSize').addEventListener('change', (e) => {
+      reviewState.pageSize = parseInt(e.target.value); reviewState.page = 1; loadReviews();
+    });
+    document.getElementById('reviewReset').addEventListener('click', () => {
+      document.getElementById('reviewSearch').value = '';
+      document.getElementById('reviewSort').value = 'date:desc';
+      ['reviewSentiment', 'reviewTrip', 'reviewYear', 'reviewRating'].forEach(id => document.getElementById(id).value = '');
+      reviewState.page = 1; loadReviews();
+    });
+    document.getElementById('reviewExport').addEventListener('click', async () => {
+      try {
+        const params = reviewParams(); params.delete('page'); params.delete('page_size'); params.set('page_size', '1000');
+        const res = await fetch(`${API_URL}/api/v1/reviews?${params}`);
+        if (!res.ok) throw new Error(res.statusText);
+        const d = await res.json();
+        const header = 'review_id,date,rating,sentiment_class,trip_type,title,text\n';
+        const escape = s => '"' + (s || '').replace(/"/g, '""').replace(/\n/g, ' ') + '"';
+        const rows = d.reviews.map(r => [r.review_id, r.date, r.rating, r.sentiment_class, r.trip_type, r.title_clean, r.text_clean].map(escape).join(',')).join('\n');
+        const blob = new Blob([header + rows], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `reviews_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+        URL.revokeObjectURL(url);
+      } catch (e) { setStatus('export', false, e.message); }
+    });
+    document.getElementById('aspectSelect').addEventListener('change', loadAspectTrend);
+    document.getElementById('volumeGranularity').addEventListener('change', loadVolumeTrendLine);
+
+    // ===== ACTIONS: localStorage Manager =====
+    const ACTIONS_KEY = 'heritage_pulse_actions';
+
+    function getActions() {
+      try { return JSON.parse(localStorage.getItem(ACTIONS_KEY) || '[]'); }
+      catch { return []; }
+    }
+
+    function saveActions(actions) {
+      localStorage.setItem(ACTIONS_KEY, JSON.stringify(actions));
+      updateActionBadge();
+    }
+
+    function addAction(action) {
+      const actions = getActions();
+      action.id = 'act_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+      action.status = action.status || 'open';
+      action.created_at = new Date().toISOString();
+      action.updated_at = action.created_at;
+      actions.unshift(action);
+      saveActions(actions);
+      return action;
+    }
+
+    function updateAction(id, updates) {
+      const actions = getActions();
+      const idx = actions.findIndex(a => a.id === id);
+      if (idx !== -1) {
+        Object.assign(actions[idx], updates, { updated_at: new Date().toISOString() });
+        saveActions(actions);
+      }
+    }
+
+    function deleteAction(id) {
+      const actions = getActions().filter(a => a.id !== id);
+      saveActions(actions);
+    }
+
+    function updateActionBadge() {
+      const all = getActions();
+      const open = all.filter(a => a.status === 'open').length;
+      const progress = all.filter(a => a.status === 'in_progress').length;
+      const resolved = all.filter(a => a.status === 'resolved').length;
+      document.getElementById('actionCount').textContent = open + progress;
+      const el = (id) => document.getElementById(id);
+      if (el('actCountOpen')) el('actCountOpen').textContent = open;
+      if (el('actCountProgress')) el('actCountProgress').textContent = progress;
+      if (el('actCountResolved')) el('actCountResolved').textContent = resolved;
+      if (el('actCountTotal')) el('actCountTotal').textContent = all.length;
+    }
+    updateActionBadge();
+
+    function relativeTime(isoStr) {
+      if (!isoStr) return '';
+      const diff = Date.now() - new Date(isoStr).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return 'just now';
+      if (mins < 60) return mins + 'm ago';
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return hrs + 'h ago';
+      const days = Math.floor(hrs / 24);
+      if (days < 30) return days + 'd ago';
+      return new Date(isoStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    // ===== ACTIONS: Render Action Items =====
+    function renderActionItems() {
+      const statusFilter = document.getElementById('actionFilterStatus')?.value || '';
+      const sourceFilter = document.getElementById('actionFilterSource')?.value || '';
+      let actions = getActions();
+      if (statusFilter) actions = actions.filter(a => a.status === statusFilter);
+      if (sourceFilter) actions = actions.filter(a => a.source_type === sourceFilter);
+
+      const sourceLabels = { alert: 'Health Alert', insight: 'Insight', recommendation: 'Recommendation', review: 'Review', manual: 'Manual' };
+      const statusLabels = { open: 'Open', in_progress: 'In Progress', resolved: 'Resolved', dismissed: 'Dismissed' };
+
+      updateActionBadge();
+
+      if (!actions.length) {
+        const hasAny = getActions().length > 0;
+        document.getElementById('actionItemsList').innerHTML = `
+          <div class="actions-empty">
+            <div class="actions-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <h4>${hasAny ? 'No matching actions' : 'No action items yet'}</h4>
+            <p>${hasAny ? 'Try adjusting your filters, or create a new action.' : 'Create actions from health alerts, AI recommendations, or negative reviews — or add one manually.'}</p>
+            ${!hasAny ? `<button class="action-btn primary labeled" onclick="openCreateActionModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Create First Action
+            </button>` : ''}
+          </div>`;
+        return;
+      }
+
+      document.getElementById('actionItemsList').innerHTML = `<div class="action-ledger">${actions.map(a => `
+        <div class="action-ledger-item">
+          <div class="action-priority-stripe ${a.priority || 'medium'}"></div>
+          <div class="action-ledger-content">
+            <div class="action-ledger-top">
+              <div class="action-ledger-title">${a.title}</div>
+              <span class="action-status-badge ${a.status}"><span class="badge-dot"></span>${statusLabels[a.status] || a.status}</span>
+            </div>
+            ${a.description ? `<div class="action-ledger-desc" onclick="this.classList.toggle('expanded')" style="cursor:pointer" title="Click to expand">${a.description}</div>` : ''}
+            <div class="action-ledger-meta">
+              <span class="meta-tag">${sourceLabels[a.source_type] || a.source_type || 'Manual'}</span>
+              <span class="meta-tag">${a.priority || 'medium'}</span>
+              ${a.assignee ? `<span class="meta-assignee">→ ${a.assignee}</span>` : ''}
+              ${a.due_hint ? `<span class="meta-due">Due: ${a.due_hint}</span>` : ''}
+              <span style="margin-left:auto;opacity:0.6">${relativeTime(a.created_at)}</span>
+            </div>
+          </div>
+          <div class="action-ledger-controls">
+            ${a.status === 'open' ? `<button class="action-btn labeled" onclick="updateAction('${a.id}',{status:'in_progress'});renderActionItems()" title="Start working on this">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start</button>` : ''}
+            ${a.status === 'in_progress' ? `<button class="action-btn green labeled" onclick="updateAction('${a.id}',{status:'resolved'});renderActionItems()" title="Mark as resolved">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Done</button>` : ''}
+            ${a.status !== 'resolved' && a.status !== 'dismissed' ? `<button class="action-btn" onclick="updateAction('${a.id}',{status:'dismissed'});renderActionItems()" title="Dismiss">Dismiss</button>` : ''}
+            ${a.status === 'resolved' || a.status === 'dismissed' ? `<button class="action-btn" onclick="updateAction('${a.id}',{status:'open'});renderActionItems()" title="Reopen">Reopen</button>` : ''}
+            <button class="action-btn" onclick="deleteAction('${a.id}');renderActionItems()" title="Delete" style="color:var(--accent)">Delete</button>
+          </div>
+        </div>
+      `).join('')}</div>`;
+    }
+
+    document.getElementById('actionFilterStatus')?.addEventListener('change', renderActionItems);
+    document.getElementById('actionFilterSource')?.addEventListener('change', renderActionItems);
+
+    // ===== ACTIONS: Create from Alert =====
+    function createActionFromAlert(alert) {
+      const action = addAction({
+        title: `Address: ${alert.display_aspect}`,
+        description: `Negative sentiment at ${alert.negative_pct}% (score: ${alert.avg_sentiment_score}). Requires investigation and remediation.`,
+        source_type: 'alert',
+        source_id: null,
+        priority: alert.negative_pct > 60 ? 'critical' : 'high',
+        assignee: '',
+        due_hint: 'within 2 weeks',
+      });
+      renderActionItems();
+      updateActionBadge();
+      openToast(`Action created for "${alert.display_aspect}"`, 'success');
+    }
+
+    // ===== ACTIONS: Create from Critical Finding =====
+    function createActionFromFinding(finding) {
+      addAction({
+        title: `Investigate: ${finding.finding}`,
+        description: `${finding.explanation}\n\nImpact: ${finding.impact}`,
+        source_type: 'alert',
+        source_id: null,
+        priority: finding.urgency || 'medium',
+        assignee: '',
+        due_hint: finding.urgency === 'critical' ? 'within 3 days' : 'within 1 week',
+      });
+      renderActionItems();
+      updateActionBadge();
+      openToast(`Action created for "${finding.finding}"`, 'success');
+    }
+
+    // ===== ACTIONS: Create Insight from Chart =====
+    function createInsightFromChart(chartType) {
+      const d = chartData[chartType];
+      if (!d) { openToast('No chart data available — load the chart first', 'error'); return; }
+
+      let title = '', description = '', priority = 'medium';
+
+      switch (chartType) {
+        case 'aspectSentiment': {
+          const negAspects = d.labels
+            .map((label, i) => ({ label, neg: d.series.negative[i], pos: d.series.positive[i] }))
+            .filter(a => a.neg > 40)
+            .sort((a, b) => b.neg - a.neg);
+          if (negAspects.length) {
+            title = `Alert: ${negAspects.length} aspect(s) with high negative sentiment`;
+            description = negAspects.map(a => `• ${a.label}: ${a.neg}% negative, ${a.pos}% positive`).join('\n');
+            priority = negAspects[0].neg > 60 ? 'critical' : 'high';
+          } else {
+            title = 'Aspect Sentiment Overview — No critical issues';
+            description = 'All aspects have negative sentiment below 40%.';
+          }
+          break;
+        }
+        case 'aspectTrend': {
+          const aspect = d.display_aspect || 'Selected aspect';
+          const trend = d.trend_by_year || [];
+          const first = trend[0]?.negative_pct || 0;
+          const last = trend[trend.length - 1]?.negative_pct || 0;
+          const direction = last > first + 5 ? 'worsening' : last < first - 5 ? 'improving' : 'stable';
+          title = `${aspect}: Sentiment trend is ${direction}`;
+          description = `${aspect} negative sentiment: ${first}% (${trend[0]?.year}) → ${last}% (${trend[trend.length - 1]?.year}). Overall trend: ${direction}.`;
+          priority = direction === 'worsening' ? 'high' : 'low';
+          break;
+        }
+        case 'volumeTrend': {
+          const periods = d.data || [];
+          const peakVol = periods.reduce((max, p) => p.volume > max.volume ? p : max, periods[0]);
+          const lowVol = periods.reduce((min, p) => p.volume < min.volume ? p : min, periods[0]);
+          title = `Volume trend: Peak at ${peakVol?.label}, low at ${lowVol?.label}`;
+          description = `Review volume ranged from ${lowVol?.volume} to ${peakVol?.volume} across ${d.granularity || 'quarterly'} periods. Average rating: ${(periods.reduce((s, p) => s + (p.avg_rating || 0), 0) / periods.length).toFixed(1)}★.`;
+          break;
+        }
+        case 'aspectRadar': {
+          const aspects = d.aspects || [];
+          const weak = aspects.filter(a => a.negative_pct > a.positive_pct).sort((a, b) => b.negative_pct - a.negative_pct);
+          const strong = aspects.filter(a => a.positive_pct > a.negative_pct).sort((a, b) => b.positive_pct - a.positive_pct);
+          title = weak.length ? `${weak.length} aspect(s) need attention` : 'All aspects performing well';
+          description = [
+            weak.length ? `Weak: ${weak.map(a => `${a.display_aspect} (${a.negative_pct}% neg)`).join(', ')}` : '',
+            strong.length ? `Strong: ${strong.slice(0, 3).map(a => `${a.display_aspect} (${a.positive_pct}% pos)`).join(', ')}` : '',
+          ].filter(Boolean).join('\n');
+          priority = weak.length ? 'high' : 'low';
+          break;
+        }
+        case 'centrality': {
+          const items = d.items || [];
+          const top = items[0];
+          title = `Entity centrality: ${top?.entity_type?.replace(/_/g, ' ')} is most connected`;
+          description = items.map(i => `• ${i.entity_type.replace(/_/g, ' ')}: ${i.avg_degree_centrality?.toFixed(3)}`).join('\n');
+          break;
+        }
+        case 'communities': {
+          const items = d.items || [];
+          title = `${d.community_count || items.length} communities detected (modularity: ${d.modularity?.toFixed(3) || '—'})`;
+          description = items.map(i => `• C${i.community_id} (${i.dominant_type}): ${i.size} members`).join('\n');
+          break;
+        }
+        default:
+          openToast('Unknown chart type', 'error');
+          return;
+      }
+
+      addAction({ title, description, source_type: 'insight', priority, assignee: '', due_hint: 'within 1 week' });
+      renderActionItems();
+      updateActionBadge();
+      openToast(`Insight saved: "${title}"`, 'success');
+    }
+
+    // ===== ACTIONS: Generate Action Plan from Recommendation =====
+    async function generateActionPlanFromRec(rec) {
+      const btn = event.target.closest('.action-btn');
+      const origHTML = btn.innerHTML;
+      btn.innerHTML = '<div class="loading" style="height:16px;margin:0"></div>';
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${API_URL}/api/v1/ai/generate-action-plan`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source_type: 'recommendation',
+            title: rec.title,
+            context: `${rec.rationale}. Expected outcome: ${rec.expected_outcome}. Effort: ${rec.effort}. Timeline: ${rec.timeline}.`,
+            num_tasks: 4,
+          }),
+        });
+        if (!res.ok) throw new Error(res.statusText);
+        const data = await res.json();
+        if (data.action_items?.length) {
+          data.action_items.forEach(item => {
+            addAction({
+              title: item.title,
+              description: item.description,
+              source_type: 'recommendation',
+              priority: item.priority || 'medium',
+              assignee: item.assignee || '',
+              due_hint: item.due_hint || '',
+            });
+          });
+          renderActionItems();
+          updateActionBadge();
+          openToast(`${data.action_items.length} action items created from "${rec.title}"`, 'success');
+        } else {
+          openToast('No action items generated', 'error');
+        }
+      } catch (e) {
+        openToast('Failed to generate action plan: ' + e.message, 'error');
+      } finally {
+        btn.innerHTML = origHTML;
+        btn.disabled = false;
+      }
+    }
+
+    // ===== ACTIONS: Manual Create Modal =====
+    function openCreateActionModal() {
+      openModal('Create Action Item', `
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <input id="newActionTitle" class="form-input" placeholder="What needs to be done?" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="newActionDesc" class="form-textarea" placeholder="Details about this task..."></textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select id="newActionPriority" class="form-select">
+              <option value="medium">Medium</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Source</label>
+            <select id="newActionSource" class="form-select">
+              <option value="manual">Manual</option>
+              <option value="alert">Health Alert</option>
+              <option value="insight">Insight</option>
+              <option value="recommendation">Recommendation</option>
+              <option value="review">Review</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label class="form-label">Assignee</label>
+            <input id="newActionAssignee" class="form-input" placeholder="e.g. maintenance_team" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Due</label>
+            <input id="newActionDue" class="form-input" placeholder="e.g. within 1 week" />
+          </div>
+        </div>
+      `, () => {
+        const title = document.getElementById('newActionTitle').value.trim();
+        if (!title) { openToast('Title is required', 'error'); return false; }
+        addAction({
+          title,
+          description: document.getElementById('newActionDesc').value.trim(),
+          source_type: document.getElementById('newActionSource').value,
+          priority: document.getElementById('newActionPriority').value,
+          assignee: document.getElementById('newActionAssignee').value.trim(),
+          due_hint: document.getElementById('newActionDue').value.trim(),
+        });
+        renderActionItems();
+        updateActionBadge();
+        openToast('Action item created', 'success');
+        return true;
+      });
+    }
+
+    // ===== DRAFT RESPONSE =====
+    async function openDraftResponseModal(reviewId) {
+      openModal('Draft Response', '<div class="loading"></div>', null);
+      try {
+        const res = await fetch(`${API_URL}/api/v1/ai/draft-response`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ review_id: reviewId, tone: 'professional' }),
+        });
+        if (!res.ok) throw new Error(res.statusText);
+        const data = await res.json();
+        const body = document.querySelector('.modal-body');
+        if (body) {
+          body.innerHTML = `
+            ${data.reviewer_name ? `<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Response to: <strong>${data.reviewer_name}</strong> · ${data.original_rating}★ · ${data.original_sentiment}</div>` : ''}
+            <div class="form-group">
+              <label class="form-label">AI-Generated Draft</label>
+              <textarea id="draftResponseText" class="form-textarea" style="min-height:140px">${data.draft || 'No draft generated'}</textarea>
+            </div>
+            ${data.error ? `<div style="color:var(--accent);font-size:11px;margin-bottom:8px">⚠ ${data.error}</div>` : ''}
+            <div style="font-size:11px;color:var(--muted)">Edit the draft above, then save or copy it.</div>
+          `;
+          const footer = document.querySelector('.modal-footer');
+          if (footer) {
+            footer.innerHTML = `
+              <button class="action-btn" onclick="copyDraftToClipboard()">Copy</button>
+              <button class="action-btn primary" onclick="saveDraftAsAction('${reviewId}')">Save as Action</button>
+              <button class="action-btn" onclick="closeModal()">Close</button>
+            `;
+          }
+        }
+      } catch (e) {
+        const body = document.querySelector('.modal-body');
+        if (body) body.innerHTML = `<div class="empty">Error: ${e.message}</div>`;
+      }
+    }
+
+    function copyDraftToClipboard() {
+      const text = document.getElementById('draftResponseText')?.value;
+      if (text) {
+        navigator.clipboard.writeText(text).then(() => openToast('Copied to clipboard', 'success'));
+      }
+    }
+
+    function saveDraftAsAction(reviewId) {
+      const draft = document.getElementById('draftResponseText')?.value;
+      if (!draft) return;
+      addAction({
+        title: `Respond to review ${reviewId}`,
+        description: draft,
+        source_type: 'review',
+        source_id: null,
+        priority: 'high',
+        assignee: 'site_manager',
+        due_hint: 'within 1 week',
+      });
+      renderActionItems();
+      updateActionBadge();
+      closeModal();
+      openToast('Response draft saved as action item', 'success');
+    }
+
+    // ===== MODAL: Generic Helper =====
+    function openModal(title, bodyHTML, onConfirm) {
+      const container = document.getElementById('modalContainer');
+      container.innerHTML = `
+        <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+          <div class="modal">
+            <div class="modal-header">
+              <h3>${title}</h3>
+              <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">${bodyHTML}</div>
+            <div class="modal-footer">
+              ${onConfirm ? `<button class="action-btn primary" id="modalConfirmBtn">Confirm</button>` : ''}
+              <button class="action-btn" onclick="closeModal()">Close</button>
+            </div>
+          </div>
+        </div>`;
+      if (onConfirm) {
+        document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+          const result = onConfirm();
+          if (result !== false) closeModal();
+        });
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('modalContainer').innerHTML = '';
+    }
+
+    // ===== TOAST NOTIFICATIONS =====
+    function openToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      const bg = type === 'success' ? 'var(--green-bg)' : type === 'error' ? 'var(--red-bg)' : 'var(--surface2)';
+      const color = type === 'success' ? 'var(--green-text)' : type === 'error' ? 'var(--red-text)' : 'var(--text)';
+      const border = type === 'success' ? 'rgba(74,122,68,0.2)' : type === 'error' ? 'rgba(181,69,27,0.2)' : 'var(--border)';
+      toast.style.cssText = `position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:5px;font-size:12px;font-weight:600;z-index:300;background:${bg};color:${color};border:1px solid ${border};box-shadow:0 4px 12px rgba(0,0,0,0.1);animation:fadeIn 0.2s ease`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+
+    // ===== LOAD ALL (dashboard tab only — others load on demand) =====
+    async function loadAll() {
+      loadedTabs['dashboard'] = true;
+      await Promise.allSettled([
+        loadKPIs(), loadVolumeLine(), loadSentimentDonut(),
+        loadTripTypeBar(), loadTopEntities(), loadAlerts(),
+      ]);
+    }
+    loadAll();
+  </script>
+</body>
+
+</html>
