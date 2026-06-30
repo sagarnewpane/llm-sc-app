@@ -546,7 +546,7 @@
       display: flex; align-items: center; justify-content: center; font-size: 14px;
     }
     .modal-close:hover { background: var(--border); color: var(--text); }
-    .modal-body { padding: 20px; }
+    .modal-body { padding: 20px; overflow-y: auto; }
     .modal-footer {
       display: flex; gap: 8px; justify-content: flex-end;
       padding: 14px 20px; border-top: 1px solid var(--border);
@@ -951,7 +951,7 @@
               <option value="scenic_spot">Scenic Spot</option>
               <option value="spiritual_authenticity">Spiritual Authenticity</option>
               <option value="sacred_atmosphere">Sacred Atmosphere</option>
-              <option value="facility">Facility</option>
+              <option value="facility">Site Facilities</option>
               <option value="cultural_sensitivity">Cultural Sensitivity</option>
               <option value="ritual_experience">Ritual Experience</option>
               <option value="environment">Environment</option>
@@ -1715,57 +1715,90 @@
     document.getElementById('aspectSelect').addEventListener('change', loadAspectTrend);
     document.getElementById('volumeGranularity').addEventListener('change', loadVolumeTrendLine);
 
-    // ===== ACTIONS: localStorage Manager =====
-    const ACTIONS_KEY = 'heritage_pulse_actions';
+    // ===== ACTIONS: API Manager =====
+    let _actionsCache = [];
 
-    function getActions() {
-      try { return JSON.parse(localStorage.getItem(ACTIONS_KEY) || '[]'); }
-      catch { return []; }
-    }
-
-    function saveActions(actions) {
-      localStorage.setItem(ACTIONS_KEY, JSON.stringify(actions));
-      updateActionBadge();
-    }
-
-    function addAction(action) {
-      const actions = getActions();
-      action.id = 'act_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-      action.status = action.status || 'open';
-      action.created_at = new Date().toISOString();
-      action.updated_at = action.created_at;
-      actions.unshift(action);
-      saveActions(actions);
-      return action;
-    }
-
-    function updateAction(id, updates) {
-      const actions = getActions();
-      const idx = actions.findIndex(a => a.id === id);
-      if (idx !== -1) {
-        Object.assign(actions[idx], updates, { updated_at: new Date().toISOString() });
-        saveActions(actions);
+    async function fetchActions() {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/actions/`);
+        if (!res.ok) throw new Error(res.statusText);
+        const data = await res.json();
+        _actionsCache = data.actions || [];
+        return _actionsCache;
+      } catch (e) {
+        console.error('Failed to fetch actions:', e);
+        return _actionsCache;
       }
     }
 
-    function deleteAction(id) {
-      const actions = getActions().filter(a => a.id !== id);
-      saveActions(actions);
+    function getActionsSync() {
+      return _actionsCache;
     }
 
-    function updateActionBadge() {
-      const all = getActions();
+    async function addAction(action) {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/actions/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(action),
+        });
+        if (!res.ok) throw new Error(res.statusText);
+        const created = await res.json();
+        _actionsCache.unshift(created);
+        updateBadgeFromCache();
+        return created;
+      } catch (e) {
+        console.error('Failed to create action:', e);
+        openToast('Failed to save action: ' + e.message, 'error');
+        return null;
+      }
+    }
+
+    async function updateAction(id, updates) {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/actions/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates),
+        });
+        if (!res.ok) throw new Error(res.statusText);
+        const updated = await res.json();
+        const idx = _actionsCache.findIndex(a => a.id === id);
+        if (idx !== -1) _actionsCache[idx] = updated;
+        updateBadgeFromCache();
+        return updated;
+      } catch (e) {
+        console.error('Failed to update action:', e);
+        openToast('Failed to update action: ' + e.message, 'error');
+        return null;
+      }
+    }
+
+    async function deleteAction(id) {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/actions/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(res.statusText);
+        _actionsCache = _actionsCache.filter(a => a.id !== id);
+        updateBadgeFromCache();
+      } catch (e) {
+        console.error('Failed to delete action:', e);
+        openToast('Failed to delete action: ' + e.message, 'error');
+      }
+    }
+
+    function updateBadgeFromCache() {
+      const all = _actionsCache;
       const open = all.filter(a => a.status === 'open').length;
       const progress = all.filter(a => a.status === 'in_progress').length;
       const resolved = all.filter(a => a.status === 'resolved').length;
-      document.getElementById('actionCount').textContent = open + progress;
       const el = (id) => document.getElementById(id);
+      if (el('actionCount')) el('actionCount').textContent = open + progress;
       if (el('actCountOpen')) el('actCountOpen').textContent = open;
       if (el('actCountProgress')) el('actCountProgress').textContent = progress;
       if (el('actCountResolved')) el('actCountResolved').textContent = resolved;
       if (el('actCountTotal')) el('actCountTotal').textContent = all.length;
     }
-    updateActionBadge();
+    fetchActions().then(updateBadgeFromCache);
 
     function relativeTime(isoStr) {
       if (!isoStr) return '';
@@ -1781,20 +1814,20 @@
     }
 
     // ===== ACTIONS: Render Action Items =====
-    function renderActionItems() {
+    async function renderActionItems() {
+      await fetchActions();
+      updateBadgeFromCache();
       const statusFilter = document.getElementById('actionFilterStatus')?.value || '';
       const sourceFilter = document.getElementById('actionFilterSource')?.value || '';
-      let actions = getActions();
+      let actions = getActionsSync();
       if (statusFilter) actions = actions.filter(a => a.status === statusFilter);
       if (sourceFilter) actions = actions.filter(a => a.source_type === sourceFilter);
 
       const sourceLabels = { alert: 'Health Alert', insight: 'Insight', recommendation: 'Recommendation', review: 'Review', manual: 'Manual' };
       const statusLabels = { open: 'Open', in_progress: 'In Progress', resolved: 'Resolved', dismissed: 'Dismissed' };
 
-      updateActionBadge();
-
       if (!actions.length) {
-        const hasAny = getActions().length > 0;
+        const hasAny = getActionsSync().length > 0;
         document.getElementById('actionItemsList').innerHTML = `
           <div class="actions-empty">
             <div class="actions-empty-icon">
@@ -1828,13 +1861,14 @@
             </div>
           </div>
           <div class="action-ledger-controls">
-            ${a.status === 'open' ? `<button class="action-btn labeled" onclick="updateAction('${a.id}',{status:'in_progress'});renderActionItems()" title="Start working on this">
+            <button class="action-btn" onclick="openEditActionModal('${a.id}')" title="Edit">Edit</button>
+            ${a.status === 'open' ? `<button class="action-btn labeled" onclick="handleActionUpdate('${a.id}',{status:'in_progress'})" title="Start working on this">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start</button>` : ''}
-            ${a.status === 'in_progress' ? `<button class="action-btn green labeled" onclick="updateAction('${a.id}',{status:'resolved'});renderActionItems()" title="Mark as resolved">
+            ${a.status === 'in_progress' ? `<button class="action-btn green labeled" onclick="handleActionUpdate('${a.id}',{status:'resolved'})" title="Mark as resolved">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Done</button>` : ''}
-            ${a.status !== 'resolved' && a.status !== 'dismissed' ? `<button class="action-btn" onclick="updateAction('${a.id}',{status:'dismissed'});renderActionItems()" title="Dismiss">Dismiss</button>` : ''}
-            ${a.status === 'resolved' || a.status === 'dismissed' ? `<button class="action-btn" onclick="updateAction('${a.id}',{status:'open'});renderActionItems()" title="Reopen">Reopen</button>` : ''}
-            <button class="action-btn" onclick="deleteAction('${a.id}');renderActionItems()" title="Delete" style="color:var(--accent)">Delete</button>
+            ${a.status !== 'resolved' && a.status !== 'dismissed' ? `<button class="action-btn" onclick="handleActionUpdate('${a.id}',{status:'dismissed'})" title="Dismiss">Dismiss</button>` : ''}
+            ${a.status === 'resolved' || a.status === 'dismissed' ? `<button class="action-btn" onclick="handleActionUpdate('${a.id}',{status:'open'})" title="Reopen">Reopen</button>` : ''}
+            <button class="action-btn" onclick="handleActionDelete('${a.id}')" title="Delete" style="color:var(--accent)">Delete</button>
           </div>
         </div>
       `).join('')}</div>`;
@@ -1843,9 +1877,81 @@
     document.getElementById('actionFilterStatus')?.addEventListener('change', renderActionItems);
     document.getElementById('actionFilterSource')?.addEventListener('change', renderActionItems);
 
+    // ===== ACTIONS: Async Handler Helpers =====
+    async function handleActionUpdate(id, updates) {
+      await updateAction(id, updates);
+      await renderActionItems();
+    }
+
+    async function handleActionDelete(id) {
+      await deleteAction(id);
+      await renderActionItems();
+    }
+
+    // ===== ACTIONS: Edit Action Modal =====
+    async function openEditActionModal(actionId) {
+      const action = getActionsSync().find(a => a.id === actionId);
+      if (!action) { openToast('Action not found', 'error'); return; }
+
+      openModal('Edit Action Item', `
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <input id="editActionTitle" class="form-input" value="${action.title}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="editActionDesc" class="form-textarea">${action.description || ''}</textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select id="editActionStatus" class="form-select">
+              <option value="open" ${action.status === 'open' ? 'selected' : ''}>Open</option>
+              <option value="in_progress" ${action.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
+              <option value="resolved" ${action.status === 'resolved' ? 'selected' : ''}>Resolved</option>
+              <option value="dismissed" ${action.status === 'dismissed' ? 'selected' : ''}>Dismissed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select id="editActionPriority" class="form-select">
+              <option value="low" ${action.priority === 'low' ? 'selected' : ''}>Low</option>
+              <option value="medium" ${action.priority === 'medium' ? 'selected' : ''}>Medium</option>
+              <option value="high" ${action.priority === 'high' ? 'selected' : ''}>High</option>
+              <option value="critical" ${action.priority === 'critical' ? 'selected' : ''}>Critical</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label class="form-label">Assignee</label>
+            <input id="editActionAssignee" class="form-input" value="${action.assignee || ''}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Due</label>
+            <input id="editActionDue" class="form-input" value="${action.due_hint || ''}" />
+          </div>
+        </div>
+      `, async () => {
+        const title = document.getElementById('editActionTitle').value.trim();
+        if (!title) { openToast('Title is required', 'error'); return false; }
+        await updateAction(actionId, {
+          title,
+          description: document.getElementById('editActionDesc').value.trim(),
+          status: document.getElementById('editActionStatus').value,
+          priority: document.getElementById('editActionPriority').value,
+          assignee: document.getElementById('editActionAssignee').value.trim(),
+          due_hint: document.getElementById('editActionDue').value.trim(),
+        });
+        await renderActionItems();
+        openToast('Action updated', 'success');
+        return true;
+      });
+    }
+
     // ===== ACTIONS: Create from Alert =====
-    function createActionFromAlert(alert) {
-      const action = addAction({
+    async function createActionFromAlert(alert) {
+      await addAction({
         title: `Address: ${alert.display_aspect}`,
         description: `Negative sentiment at ${alert.negative_pct}% (score: ${alert.avg_sentiment_score}). Requires investigation and remediation.`,
         source_type: 'alert',
@@ -1854,14 +1960,13 @@
         assignee: '',
         due_hint: 'within 2 weeks',
       });
-      renderActionItems();
-      updateActionBadge();
+      await renderActionItems();
       openToast(`Action created for "${alert.display_aspect}"`, 'success');
     }
 
     // ===== ACTIONS: Create from Critical Finding =====
-    function createActionFromFinding(finding) {
-      addAction({
+    async function createActionFromFinding(finding) {
+      await addAction({
         title: `Investigate: ${finding.finding}`,
         description: `${finding.explanation}\n\nImpact: ${finding.impact}`,
         source_type: 'alert',
@@ -1870,13 +1975,12 @@
         assignee: '',
         due_hint: finding.urgency === 'critical' ? 'within 3 days' : 'within 1 week',
       });
-      renderActionItems();
-      updateActionBadge();
+      await renderActionItems();
       openToast(`Action created for "${finding.finding}"`, 'success');
     }
 
     // ===== ACTIONS: Create Insight from Chart =====
-    function createInsightFromChart(chartType) {
+    async function createInsightFromChart(chartType) {
       const d = chartData[chartType];
       if (!d) { openToast('No chart data available — load the chart first', 'error'); return; }
 
@@ -1947,9 +2051,8 @@
           return;
       }
 
-      addAction({ title, description, source_type: 'insight', priority, assignee: '', due_hint: 'within 1 week' });
-      renderActionItems();
-      updateActionBadge();
+      await addAction({ title, description, source_type: 'insight', priority, assignee: '', due_hint: 'within 1 week' });
+      await renderActionItems();
       openToast(`Insight saved: "${title}"`, 'success');
     }
 
@@ -1973,8 +2076,9 @@
         if (!res.ok) throw new Error(res.statusText);
         const data = await res.json();
         if (data.action_items?.length) {
-          data.action_items.forEach(item => {
-            addAction({
+          const created = [];
+          for (const item of data.action_items) {
+            const a = await addAction({
               title: item.title,
               description: item.description,
               source_type: 'recommendation',
@@ -1982,10 +2086,10 @@
               assignee: item.assignee || '',
               due_hint: item.due_hint || '',
             });
-          });
-          renderActionItems();
-          updateActionBadge();
-          openToast(`${data.action_items.length} action items created from "${rec.title}"`, 'success');
+            if (a) created.push(a);
+          }
+          await renderActionItems();
+          showActionPlanResult(rec.title, created, data.summary);
         } else {
           openToast('No action items generated', 'error');
         }
@@ -1997,8 +2101,37 @@
       }
     }
 
+    function showActionPlanResult(planTitle, actions, summary) {
+      const statusLabels = { open: 'Open', in_progress: 'In Progress', resolved: 'Resolved', dismissed: 'Dismissed' };
+      const priorityColors = { critical: 'var(--accent)', high: 'var(--warning)', medium: 'var(--info)', low: 'var(--success)' };
+      const body = `
+        <div style="margin-bottom:12px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Action Plan: <strong>${planTitle}</strong></div>
+          ${summary ? `<div style="font-size:11px;color:var(--muted);line-height:1.5">${summary}</div>` : ''}
+        </div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px">${actions.length} Action Items Created</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${actions.map(a => `
+            <div style="background:var(--surface-alt);border-radius:8px;padding:12px;border-left:3px solid ${priorityColors[a.priority] || 'var(--info)'}">
+              <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px">
+                <div style="font-size:13px;font-weight:600">${a.title}</div>
+                <span class="action-status-badge ${a.status}" style="font-size:10px;white-space:nowrap;margin-left:8px"><span class="badge-dot"></span>${statusLabels[a.status] || a.status}</span>
+              </div>
+              ${a.description ? `<div style="font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:6px">${a.description}</div>` : ''}
+              <div style="display:flex;gap:8px;font-size:10px;color:var(--muted);flex-wrap:wrap">
+                <span style="background:var(--surface);padding:2px 6px;border-radius:4px">${a.priority}</span>
+                ${a.assignee ? `<span>→ ${a.assignee}</span>` : ''}
+                ${a.due_hint ? `<span>Due: ${a.due_hint}</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      openModal('Action Plan Created', body, null);
+    }
+
     // ===== ACTIONS: Manual Create Modal =====
-    function openCreateActionModal() {
+    async function openCreateActionModal() {
       openModal('Create Action Item', `
         <div class="form-group">
           <label class="form-label">Title</label>
@@ -2039,10 +2172,10 @@
             <input id="newActionDue" class="form-input" placeholder="e.g. within 1 week" />
           </div>
         </div>
-      `, () => {
+      `, async () => {
         const title = document.getElementById('newActionTitle').value.trim();
         if (!title) { openToast('Title is required', 'error'); return false; }
-        addAction({
+        await addAction({
           title,
           description: document.getElementById('newActionDesc').value.trim(),
           source_type: document.getElementById('newActionSource').value,
@@ -2050,8 +2183,7 @@
           assignee: document.getElementById('newActionAssignee').value.trim(),
           due_hint: document.getElementById('newActionDue').value.trim(),
         });
-        renderActionItems();
-        updateActionBadge();
+        await renderActionItems();
         openToast('Action item created', 'success');
         return true;
       });
@@ -2101,10 +2233,10 @@
       }
     }
 
-    function saveDraftAsAction(reviewId) {
+    async function saveDraftAsAction(reviewId) {
       const draft = document.getElementById('draftResponseText')?.value;
       if (!draft) return;
-      addAction({
+      await addAction({
         title: `Respond to review ${reviewId}`,
         description: draft,
         source_type: 'review',
@@ -2113,8 +2245,7 @@
         assignee: 'site_manager',
         due_hint: 'within 1 week',
       });
-      renderActionItems();
-      updateActionBadge();
+      await renderActionItems();
       closeModal();
       openToast('Response draft saved as action item', 'success');
     }

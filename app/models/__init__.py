@@ -21,6 +21,7 @@ from app.models.extraction_checkpoint import ExtractionCheckpoint
 from app.models.normalization_run import NormalizationRun
 from app.models.normalization_checkpoint import NormalizationCheckpoint
 from app.models.viz_metadata import VizMetadata
+from app.models.action_item import ActionItem
 
 __all__ = [
     "CleanedReview",
@@ -46,4 +47,5 @@ __all__ = [
     "NormalizationRun",
     "NormalizationCheckpoint",
     "VizMetadata",
+    "ActionItem",
 ]

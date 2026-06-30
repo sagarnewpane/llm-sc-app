@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
 
     model_config = {
-        "env_file": str(BASE_DIR / "app" / ".env"),
+        "env_file": str(BASE_DIR / ".env"),
         "env_file_encoding": "utf-8",
         "extra": "ignore",
     }

@@ -7,6 +7,7 @@ from app.api.v1.routers.reviews import router as reviews_router
 from app.api.v1.routers.ai_insights import router as ai_router
 from app.api.v1.routers.analytics import router as analytics_router
 from app.api.v1.routers.heritage import router as heritage_router
+from app.api.v1.routers.actions import router as actions_router
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -19,3 +20,4 @@ router.include_router(reviews_router)
 router.include_router(ai_router)
 router.include_router(analytics_router)
 router.include_router(heritage_router)
+router.include_router(actions_router)
